@@ -19,7 +19,6 @@ app.listen(port, async () => {
             console.group(colors.green(tweet.id));
             console.log(tweet.text)
             console.log(tweet.entities)
-            console.log(tweet.retweeted)
             console.log(tweet.retweet_count)
             console.groupEnd()
         }
