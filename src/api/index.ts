@@ -1,19 +1,21 @@
-import express, {Application} from "express";
+import express, {Application, Request, Response} from "express";
 import cors from "cors";
-import "dotenv/config";
-import {env} from 'process';
+import {router as v1Router} from "./v1";
+import {env} from "process";
 
 // Instantiate the Express App.
-const port = env.SERVER_PORT!;
+
 const app: Application = express();
 app.use(cors());
 
+app.use("/api/v1/", v1Router)
 
-// listen to incoming requests.
-app.listen(port, () => {
-    console.log(`Web server running on PORT ${port}`);
+app.get('/', (req: Request, res: Response) => {
+    res.json({
+        version: env.VERSION!,
+        description: "Backend Server for CryptoBOT Twitter Service",
+    });
 })
-
 
 // default export
 export default app;
