@@ -4,6 +4,8 @@ import "dotenv/config";
 import colors from "colors"
 import T from "./bot";
 import { likeTweet, sendAck } from "./controllers";
+import { IncomingRequest } from "./classes/IncomingRequest";
+import { text } from "stream/consumers";
 
 const port = env.SERVER_PORT!;
 // listen to incoming requests.
@@ -17,22 +19,27 @@ app.listen(port, async () => {
         const isRetweeted: boolean = tweet.retweeted_status != null;
         const tweetID: string = tweet.id_str;
         const userID: string = tweet.user.id_str;
+        const accountName: string = tweet.user.name;
         const userScreenName: string = tweet.user.screen_name;
         const tweetText: string = tweet.text;
-        const symbolHashes: string[] = tweet.entities.hashtags.map((tag: any) => tag.text)
+        const symbolHashes: string[] = tweet.entities.hashtags.map((tag: any) => tag.text);
 
+        let request: IncomingRequest = new IncomingRequest(
+            tweetID,
+            userID,
+            accountName,
+            userScreenName,
+            tweetText,
+            tweet.entities.hashtags,
+        );
 
         if (!isRetweeted) {
-            console.group(`TWEET ID: `.bgGreen, tweetID)
-                console.log('USER ID: '.bgMagenta, userID);
-                console.log('Screen Name: '.bgMagenta, userScreenName);
-                console.log('TEXT: '.bgMagenta, tweetText)
-                console.log('SYMBOL HASH: '.bgMagenta, symbolHashes)
-            console.groupEnd()
-        
+            // Log to console.
+            request.log();
+
             // likeTweet(tweetID);
-            sendAck(userID, symbolHashes, userScreenName);
-            }
+            request.sendAck();
+        }
      });
 
 

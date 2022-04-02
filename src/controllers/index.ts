@@ -1,8 +1,6 @@
 import T from "../bot";
 
 
-
-
 /**
  * 
  * @description - Controller to `like` a tweet.
