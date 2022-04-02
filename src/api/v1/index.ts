@@ -2,6 +2,7 @@ import {Request, Response, Router} from "express";
 import "dotenv/config";
 import {env} from 'process';
 import colors from "colors";
+import { IPricePayload } from "../../types";
 
 // Instantiate Express Router
 export const router: Router = Router();
@@ -18,26 +19,14 @@ export const router: Router = Router();
     })
 });
 
+
 /**
- * @description Callback handler for Twitter authentication.
- * @returns JSON Response 
- * @deprecated
+ * Listen to the payload [IPricePayload] from Main Service - CryptoBOT
+ * Query the database to see if users have the subscription set.
+ * If so, check if user needs to be alerted.
  */
- router.get("/callback", async (req: Request, res:Response) => {
+
+router.post('/payload', (req: Request, res: Response) => {
+    const payload: IPricePayload = req.body;
     
-    console.log('/callback entered')
-    // Exact tokens from query string
-    const oauth_token = req.query.oauth_token as string;
-    const oauth_verifier = req.query.oauth_verifier as string;
-
-    // Get the saved oauth_token_secret from session
-    //@ts-ignore
-    const { oauth_token_secret } = req.session;
-
-    
-    if (!oauth_token || !oauth_verifier || !oauth_token_secret) {
-        console.log("Twitter Authentication Failed.".red);
-        return res.status(400).send('You denied the app or your session expired!');
-    }
-
 });
