@@ -7,21 +7,17 @@
 ## Database Models
 	User
 		- ID
+		- @username
 		- screen_name
-		- subscriptions_USDT
-		- subscriptions_BTC
+		- subscriptions
+		- alerts
 		  
-	SYMBOLS_USDT
+	SYMBOL
 		- ID
 		- SYMBOL
 		- USERS (ID)
 
-	SYMBOLS_BTC
-		- ID
-		- SYMBOL
-		- USERS (ID)
-
-	CUSTOM_ALERTS
+	CUSTOM_ALERT
 		- ID
 		- SYMBOL
 		- USER_ID
