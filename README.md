@@ -7,6 +7,7 @@
 ## Database Models
 	User
 		- ID
+		- @username
 		- screen_name
 		- subscriptions_USDT
 		- subscriptions_BTC
