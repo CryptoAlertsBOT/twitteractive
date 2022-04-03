@@ -3,17 +3,21 @@ import {env} from "process";
 import "dotenv/config";
 import colors from "colors"
 import T from "./bot";
-import { likeTweet, sendAck } from "./controllers";
+import { connectDB, likeTweet, sendAck } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
-import { text } from "stream/consumers";
 
 const port = env.SERVER_PORT!;
+
+
 // listen to incoming requests.
 app.listen(port, async () => {
+    //connect DB
+    await connectDB();
+
     console.log(colors.green(`Web server running on PORT ${port}`));
 
     const tweetStream = await T.stream("statuses/filter", {track: "@Crypto3OT", lang: 'en'});
-  
+    
     
     tweetStream.on('tweet', async (tweet) => {
         const isRetweeted: boolean = tweet.retweeted_status != null;
@@ -42,7 +46,5 @@ app.listen(port, async () => {
         }
      });
 
-
-     
 })
 
