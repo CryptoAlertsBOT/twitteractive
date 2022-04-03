@@ -8,7 +8,7 @@ import {env} from "process";
 const app: Application = express();
 app.use(cors());
 
-app.use("/api/v1/", v1Router)
+app.use("/hook/v1/", v1Router)
 
 app.get('/', (req: Request, res: Response) => {
     res.json({

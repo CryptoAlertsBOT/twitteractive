@@ -28,5 +28,6 @@ export const router: Router = Router();
 
 router.post('/payload', (req: Request, res: Response) => {
     const payload: IPricePayload = req.body;
-    
+
+    // Query payload with database.
 });
