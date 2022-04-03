@@ -12,17 +12,12 @@
 		- subscriptions_USDT
 		- subscriptions_BTC
 		  
-	SYMBOLS_USDT
+	SYMBOL
 		- ID
 		- SYMBOL
 		- USERS (ID)
 
-	SYMBOLS_BTC
-		- ID
-		- SYMBOL
-		- USERS (ID)
-
-	CUSTOM_ALERTS
+	CUSTOM_ALERT
 		- ID
 		- SYMBOL
 		- USER_ID
