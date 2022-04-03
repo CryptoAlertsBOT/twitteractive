@@ -38,7 +38,7 @@ app.listen(port, async () => {
             request.log();
 
             // likeTweet(tweetID);
-            request.sendAck();
+            // request.sendAck(); [Private]
         }
      });
 

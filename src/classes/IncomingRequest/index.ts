@@ -33,7 +33,7 @@ export class IncomingRequest {
         console.groupEnd();
     }
 
-    public sendAck(): void {
+    private sendAck(): void {
         T.post('direct_messages/events/new', 
             {//@ts-ignore
                 event: {
