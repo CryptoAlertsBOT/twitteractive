@@ -14,7 +14,7 @@ const SymbolSchema: Schema<ISymbolSchema> = new Schema({
         type: Types.ObjectId,
         ref: "User"
     }]
-})
+}, {timestamps: true})
 
 
 export const Symbol: mongoose.Model<ISymbolSchema> = mongoose.model<ISymbolSchema>("Symbol", SymbolSchema);

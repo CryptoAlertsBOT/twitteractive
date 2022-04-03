@@ -23,6 +23,6 @@ const userSchema: Schema<IUserSchema> = new Schema({
         type: Types.ObjectId,
         ref: "CustomAlert"
     }]
-})
+}, {timestamps: true})
 
 export const User: mongoose.Model<IUserSchema> = mongoose.model<IUserSchema>("User", userSchema);
