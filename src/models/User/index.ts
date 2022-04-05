@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
 import {Schema, Types} from "mongoose";
-import { IUserSchema } from "./types";
+import { IUserModel, IUserSchema } from "./types";
 
 const userSchema: Schema<IUserSchema> = new Schema({
+    twitterID: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     username: {
         type: String,
         required: [true, "Username cannot be empty!"],
@@ -25,4 +30,6 @@ const userSchema: Schema<IUserSchema> = new Schema({
     }]
 }, {timestamps: true})
 
-export const User: mongoose.Model<IUserSchema> = mongoose.model<IUserSchema>("User", userSchema);
+
+
+export const User: mongoose.Model<IUserSchema> = mongoose.model<IUserSchema, IUserModel>("User", userSchema);
