@@ -3,8 +3,9 @@ import {env} from "process";
 import "dotenv/config";
 import colors from "colors"
 import T from "./bot";
-import { connectDB, likeTweet, sendAck } from "./controllers";
+import { connectDB } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
+import { AddRequest } from "./classes/AddRequest";
 
 const port = env.SERVER_PORT!;
 
@@ -26,7 +27,7 @@ app.listen(port, async () => {
         const accountName: string = tweet.user.name;
         const userScreenName: string = tweet.user.screen_name;
         const tweetText: string = tweet.text;
-        const symbolHashes: string[] = tweet.entities.hashtags.map((tag: any) => tag.text);
+        const symbolHashEntity: Object[] = tweet.entities.hashtags;
 
         /**
          * @AnkitVaity
@@ -39,20 +40,22 @@ app.listen(port, async () => {
          * if request is an ADD request then instantiate with new AddRequest()
          */
 
-        let request: IncomingRequest = new IncomingRequest(
+
+
+        let request;
+        request = new AddRequest(
             tweetID,
             userID,
             accountName,
             userScreenName,
-            tweetText
+            tweetText,
+            symbolHashEntity
         );
 
         if (!isRetweeted) {
             // Log to console.
             request.log();
 
-            // likeTweet(tweetID);
-            // request.sendAck(); [Private]
         }
      });
 

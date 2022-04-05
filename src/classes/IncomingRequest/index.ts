@@ -77,8 +77,8 @@ export class IncomingRequest {
      * @returns CommandType enum
      */
     public static validateRequest(): CommandType {
-
-     return CommandType.ADD; // or whatever
+        
+        return CommandType.ADD; // or whatever
     }
 
     public log(): void {
