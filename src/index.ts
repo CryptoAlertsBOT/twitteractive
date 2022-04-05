@@ -22,7 +22,11 @@ app.listen(port, async () => {
     
     
     tweetStream.on('tweet', async (tweet) => {
+        
         const isRetweeted: boolean = tweet.retweeted_status != null;
+        if (isRetweeted) {
+            return;
+        }
         const tweetID: string = tweet.id_str;
         const userID: string = tweet.user.id_str;
         const accountName: string = tweet.user.name;
@@ -31,8 +35,6 @@ app.listen(port, async () => {
         const symbolHashEntity: Object[] = tweet.entities.hashtags;
 
         /**
-         * @AnkitVaity
-         * @anubhavanand23
          * regex here to find out which commandType this request belongs to. 
          * Implement functionality in IncomingRequest.validateRequest().
          * Then, instantiate like below with their respecitive classes
@@ -41,13 +43,12 @@ app.listen(port, async () => {
          * if request is an ADD request then instantiate with new AddRequest()
          */
 
-        const commandType = IncomingRequest.validateRequest(tweetText)
 
-        let request: any;
+        const commandType = IncomingRequest.validateRequest(tweetText)
 
         if(commandType == CommandType.ADD) {
             // Add Request
-            request = new AddRequest(
+            let request: AddRequest = new AddRequest(
                 tweetID,
                 userID,
                 accountName,
@@ -55,30 +56,18 @@ app.listen(port, async () => {
                 tweetText,
                 symbolHashEntity,
                 isRetweeted
-            )
+            );
+
+            request.addSubscription();
+            
         } else if (commandType == CommandType.REMOVE) {
             // Remove Request
         } else if (commandType == CommandType.SETALERT) {
             // Set Alert
         } else if (commandType == CommandType.REMOVEALERT){
             // Remove Alert
-        } else {
+        } 
 
-        }
-
-        // let request: IncomingRequest = new IncomingRequest(
-        //     tweetID,
-        //     userID,
-        //     accountName,
-        //     userScreenName,
-        //     tweetText
-        // );
-
-        if (!isRetweeted) {
-            // Log to console.
-            // request.log();
-
-        }
      });
 
 })

@@ -37,7 +37,7 @@ export class IncomingRequest {
 
     public static async validateUser(twitterID: string, username: string, screen_name: string): Promise<UserDocument> {
         let currentUser: UserDocument | null = await User.findOne({twitterID}).exec();
-        
+
         if (!currentUser) {
             const newUser: UserDocument = new User({
                 twitterID,
@@ -47,6 +47,7 @@ export class IncomingRequest {
                 alerts: []
             })
 
+            newUser.save();
             return newUser;
         }
 
@@ -65,6 +66,7 @@ export class IncomingRequest {
         if (!currentSymbol) {
             const newSymbol: SymbolDocument = new Symbol({ symbol, users: [] });
 
+            newSymbol.save();
             return newSymbol;
         }
 

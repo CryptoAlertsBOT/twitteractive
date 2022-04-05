@@ -49,11 +49,14 @@ export class AddRequest extends IncomingRequest {
 
         // create symbol if not exists in `symbol` collection.
         let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
-
+        
         try {
             
-            await User.findByIdAndUpdate(user._id, {$push: {subscriptions: symbol._id}}, {new: true}).exec();
-            await Symbol.findByIdAndUpdate(symbol._id, {$push: {users: user._id}}, {new: true}).exec();
+            let updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
+            let updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
+
+            console.log("updated_user ", updatedUser);
+            console.log("updated symbol ", updatedSymbol);
 
         } catch (e: unknown) {
             console.log(e);
@@ -82,7 +85,7 @@ export class AddRequest extends IncomingRequest {
                             recipient_id: this.userID
                         },
                         message_data: {
-                            text: `Alert created for ${this.symbol}, ${this.username}. You will be notified when it hits.`
+                            text: `Subscription added for ${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.` 
                         }
                     }
                 }
