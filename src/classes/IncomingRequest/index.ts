@@ -28,9 +28,9 @@ export class IncomingRequest {
      * 
      * @returns CommandType enum
      */
-    public static validateRequest(): CommandType {
+    // public static validateRequest(): CommandType {
         
-    }
+    // }
 
     public log(): void {
         console.group(`TWEET ID: `.bgGreen, this.tweetID);
