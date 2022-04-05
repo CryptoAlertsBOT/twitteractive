@@ -1,5 +1,9 @@
+import mongoose from "mongoose";
 import T from "../../bot";
-import { CommandType } from "../../types/twitter";
+import { Symbol } from "../../models/Symbol";
+import { User } from "../../models/User";
+import { IUserSchema } from "../../models/User/types";
+import { CommandType, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -10,37 +14,65 @@ import { IncomingRequest } from "../IncomingRequest";
 
 export class AddRequest extends IncomingRequest {
 
-    public commandType: CommandType = CommandType.ADD;
+    // public commandType: CommandType = CommandType.ADD;
     private hashtags: Array<string>;
+    private symbol: string;
 
-    constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>) {
+    constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>, reTweeted: boolean) {
 
         // Instantiate super class [IncomingRequest]
-        super(tweetID, userID, accountName, screenName, text);
+        super(tweetID, userID, accountName, screenName, text, reTweeted, CommandType.ADD);
 
         // set class specific properties
-        this.hashtags = IncomingRequest.extractSymbols(hashtags)
+        this.hashtags = IncomingRequest.extractSymbols(hashtags);
+        // set symbol to the first recorded hashtag.
+        this.symbol = this.hashtags[0];
+
+        // validate symbol.
     }
 
 
     /**
-     * @AnkitVaity @anubhavanand23 @
      * @description Function to add the subscription request to the database.
      * @params Symbol - this.symbol
      * @params User - this.userID
      * 
      * @summary Must add the SYMBOL given to the `user.subscriptions` collection.
      * on Success trigger this.sendAck()
+     * 
+     * @returns Promise<boolean>
      */
 
-    public addSubscription() {
-        
+    public async addSubscription(): Promise<boolean> {
+        // validate user
+        let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
+
+        // create symbol if not exists in `symbol` collection.
+        let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
+
+        try {
+            
+            await User.findByIdAndUpdate(user._id, {$push: {subscriptions: symbol._id}}, {new: true}).exec();
+            await Symbol.findByIdAndUpdate(symbol._id, {$push: {users: user._id}}, {new: true}).exec();
+
+        } catch (e: unknown) {
+            console.log(e);
+            return false;
+        }
+
+        // like tweet
+        this.likeTweet();
+        // Send acknowledgement
+        this.sendAddAck()
+        return true;
     }
 
-
-
-
-    private sendAck(): void {
+    /**
+     * @description Sends a notification to the user regarding the subscription add event.
+     * @returns void
+     */
+    
+    private sendAddAck(): void {
         T.post('direct_messages/events/new', 
             {//@ts-ignore
                 event: {
@@ -50,7 +82,7 @@ export class AddRequest extends IncomingRequest {
                             recipient_id: this.userID
                         },
                         message_data: {
-                            text: `Alert created for ${this.hashtags[0]}, ${this.name}. You will be notified when it hits.`
+                            text: `Alert created for ${this.symbol}, ${this.username}. You will be notified when it hits.`
                         }
                     }
                 }
