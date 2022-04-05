@@ -28,13 +28,22 @@ app.listen(port, async () => {
         const tweetText: string = tweet.text;
         const symbolHashes: string[] = tweet.entities.hashtags.map((tag: any) => tag.text);
 
+        /**
+         * @AnkitVaity
+         * @anubhavanand23
+         * regex here to find out which commandType this request belongs to.
+         * Then, instantiate like below with their respecitive classes
+         * ref: classes/* folder.
+         * 
+         * if request is an ADD request then instantiate with new AddRequest()
+         */
+
         let request: IncomingRequest = new IncomingRequest(
             tweetID,
             userID,
             accountName,
             userScreenName,
-            tweetText,
-            tweet.entities.hashtags,
+            tweetText
         );
 
         if (!isRetweeted) {
