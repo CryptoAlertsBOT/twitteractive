@@ -7,6 +7,7 @@
 ## Database Models
 	User
 		- ID
+		- twitterID
 		- @username
 		- screen_name
 		- subscriptions
