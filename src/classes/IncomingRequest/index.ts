@@ -11,14 +11,18 @@ export class IncomingRequest {
     readonly username: string;
     readonly screenName: string;
     readonly text: string;
-    public commandType: CommandType = CommandType.UNSET;
+    readonly reTweeted: boolean;
+    public commandType: CommandType;
 
-    constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string) {
+    constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, reTweeted: boolean, type: CommandType) {
         this.tweetID = tweetID;
         this.userID = userID;
         this.username = accountName;
         this.screenName = screenName;
         this.text = text;
+        this.reTweeted = reTweeted
+        this.commandType = type == null ? CommandType.UNSET : type
+        this.log()
     }
 
     public static extractSymbols(hashtags: Array<Object>): Array<string> {
@@ -76,9 +80,26 @@ export class IncomingRequest {
      * 
      * @returns CommandType enum
      */
-    public static validateRequest(): CommandType {
 
-     return CommandType.ADD; // or whatever
+    public static validateRequest(text: string): CommandType {
+        var addKeyword = 'add'
+        var addKeywordRegex = new RegExp("(^| +)" + addKeyword + "( +|[.])", "i");
+
+        var removeKeyword = 'remove'
+        var removeKeywordRegex = new RegExp("(^| +)" + removeKeyword + "( +|[.])", "i");
+
+        var setalertKeyword = 'setalert'
+        var setalertKeywordRegex = new RegExp("(^| +)" + setalertKeyword + "( +|[.])", "i");
+
+        var removealertKeyword = 'removealert'
+        var removealertKeywordRegex = new RegExp("(^| +)" + removealertKeyword + "( +|[.])", "i");
+
+        const commandType = addKeywordRegex.test(text) ? CommandType.ADD :
+                            removeKeywordRegex.test(text) ? CommandType.REMOVE :
+                            setalertKeywordRegex.test(text) ? CommandType.SETALERT :
+                            removealertKeywordRegex.test(text) ? CommandType.REMOVEALERT : CommandType.UNSET
+
+        return commandType;
     }
 
     public log(): void {

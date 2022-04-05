@@ -14,14 +14,14 @@ import { IncomingRequest } from "../IncomingRequest";
 
 export class AddRequest extends IncomingRequest {
 
-    public commandType: CommandType = CommandType.ADD;
+    // public commandType: CommandType = CommandType.ADD;
     private hashtags: Array<string>;
     private symbol: string;
 
-    constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>) {
+    constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>, reTweeted: boolean) {
 
         // Instantiate super class [IncomingRequest]
-        super(tweetID, userID, accountName, screenName, text);
+        super(tweetID, userID, accountName, screenName, text, reTweeted, CommandType.ADD);
 
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);

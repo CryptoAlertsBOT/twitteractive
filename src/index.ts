@@ -5,6 +5,8 @@ import colors from "colors"
 import T from "./bot";
 import { connectDB, likeTweet, sendAck } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
+import { AddRequest } from "./classes/AddRequest";
+import { CommandType } from "./types/twitter";
 
 const port = env.SERVER_PORT!;
 
@@ -39,17 +41,42 @@ app.listen(port, async () => {
          * if request is an ADD request then instantiate with new AddRequest()
          */
 
-        let request: IncomingRequest = new IncomingRequest(
-            tweetID,
-            userID,
-            accountName,
-            userScreenName,
-            tweetText
-        );
+        const commandType = IncomingRequest.validateRequest(tweetText)
+
+        let request: any;
+
+        if(commandType == CommandType.ADD) {
+            // Add Request
+            request = new AddRequest(
+                tweetID,
+                userID,
+                accountName,
+                userScreenName,
+                tweetText,
+                symbolHashes,
+                isRetweeted
+            )
+        } else if (commandType == CommandType.REMOVE) {
+            // Remove Request
+        } else if (commandType == CommandType.SETALERT) {
+            // Set Alert
+        } else if (commandType == CommandType.REMOVEALERT){
+            // Remove Alert
+        } else {
+
+        }
+
+        // let request: IncomingRequest = new IncomingRequest(
+        //     tweetID,
+        //     userID,
+        //     accountName,
+        //     userScreenName,
+        //     tweetText
+        // );
 
         if (!isRetweeted) {
             // Log to console.
-            request.log();
+            // request.log();
 
             // likeTweet(tweetID);
             // request.sendAck(); [Private]
