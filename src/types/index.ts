@@ -3,7 +3,3 @@ export interface IPricePayload {
     price: number
 }
 
-// fill this from entity object blueprint later.
-export type TweetEntityObject = {
-
-}

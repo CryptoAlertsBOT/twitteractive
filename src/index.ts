@@ -31,7 +31,8 @@ app.listen(port, async () => {
         /**
          * @AnkitVaity
          * @anubhavanand23
-         * regex here to find out which commandType this request belongs to.
+         * regex here to find out which commandType this request belongs to. 
+         * Implement functionality in IncomingRequest.validateRequest().
          * Then, instantiate like below with their respecitive classes
          * ref: classes/* folder.
          * 

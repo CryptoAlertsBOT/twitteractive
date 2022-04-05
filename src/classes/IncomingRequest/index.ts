@@ -21,6 +21,17 @@ export class IncomingRequest {
         return hashtags.map((tag: any) => tag.text);
     }
 
+    /**
+     * @description Search this.text for CommandTypes
+     * If doesn't match any of the CommandTypes, set as new IncomingRequest(). 
+     * Otherwise, for add - new AddRequest() etc..
+     * 
+     * @returns CommandType enum
+     */
+    public static validateRequest(): CommandType {
+        
+    }
+
     public log(): void {
         console.group(`TWEET ID: `.bgGreen, this.tweetID);
                 console.log('USER ID: '.bgMagenta, this.userID);
