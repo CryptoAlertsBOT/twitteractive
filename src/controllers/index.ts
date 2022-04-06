@@ -4,6 +4,7 @@ import T from "../bot";
 import { apiConfig } from "../config";
 import { APISymbolResponse } from "../types";
 import { InvalidRequestType } from "../types/twitter";
+import fetch from "node-fetch";
 
 
 
@@ -28,15 +29,19 @@ export const connectDB = async (): Promise<boolean> => {
  * @description call to GET /api/v3/ticker/price
  * @returns Promise<boolean>
  */
-export const checkSymbolValidity = async (symbol: string): Promise<boolean> => {
-    let response: AxiosResponse<APISymbolResponse> = await axios.get(`${apiConfig.baseURL}${apiConfig.marketPriceEndpoint}`, {params: {symbol}});
-    
-    // check if symbol is valid
-    if (!response.data.symbol) {
-        return false;
-    } 
+export const getBinanceData = async (symbol: string): Promise<Response | null>  => {
+    symbol = symbol.toUpperCase();
+    try {
+        let url = new URL('https://api.binance.com/api/v3/ticker/price');
+        var params = {symbol};
+        url.search = new URLSearchParams(params).toString();
+        //@ts-ignore
+        return fetch(url);
 
-    return true;
+    } catch(err) {
+        console.log(err)
+        return null;
+    }
 };
 
 /**

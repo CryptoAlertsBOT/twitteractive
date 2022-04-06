@@ -1,5 +1,4 @@
-import T from "../../bot";
-import { checkSymbolValidity, sendMessageToUser } from "../../controllers";
+import { getBinanceData, sendMessageToUser } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
 import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
@@ -46,42 +45,55 @@ export class AddRequest extends IncomingRequest {
         let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
 
         // check if symbol is a valid symbol
-        if (!await checkSymbolValidity(this.symbol)) {
+        const data: Promise<Response | null> = getBinanceData(this.symbol)
+        let isValidSymbol = true;
+        data
+            .then((res) => res?.json())
+            .then(async (data) => {
+                if (data.msg) {
+                    isValidSymbol = false;
+                }
 
-            //notify user
-            const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
-            this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
-            return false;
-        }
+                if (!isValidSymbol) {
 
-        // check if already in DB.
-        let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
-        let updatedUser;
-        let updatedSymbol;
-        try {
-            
-            updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
-            updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
+                    //notify user
+                    const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
+                    this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
+                    return false;
+                }
+        
+                // check if already in DB.
+                let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
+                let updatedUser;
+                let updatedSymbol;
+                try {
+                    
+                    updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
+                    updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
+        
+                } catch (e: unknown) {
+                    
+                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+                    return false;
+                }
+        
+                if (updatedSymbol && updatedUser) {
+        
+                    // like tweet
+                    this.likeTweet();
+                    // Send acknowledgement
+                    this.sendAddAck()
+                    return true;
+        
+                } else {
+                        
+                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+                    return false;
+                }
 
-        } catch (e: unknown) {
-            
-            this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
-            return false;
-        }
-
-        if (updatedSymbol && updatedUser) {
-
-            // like tweet
-            this.likeTweet();
-            // Send acknowledgement
-            this.sendAddAck()
-            return true;
-
-        } else {
-                
-            this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
-            return false;
-        }
+                ;
+            })
+        return false
         
     }
 
