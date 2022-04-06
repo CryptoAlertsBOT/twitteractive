@@ -23,7 +23,7 @@ const CustomAlertSchema: Schema<ICustomAlertSchema> = new Schema({
         required: true,
         min: [0, "Current price cannot be negative or 0"]
     }
-}, {timestamps: {createdAt: true, updatedAt: false}})
+}, {timestamps: {createdAt: true, updatedAt: false, currentTime: () => new Date()}})
 
 
 export const CustomAlert: mongoose.Model<ICustomAlertSchema> = mongoose.model<ICustomAlertSchema>("CustomAlert", CustomAlertSchema);

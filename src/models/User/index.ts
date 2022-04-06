@@ -28,8 +28,8 @@ const userSchema: Schema<IUserSchema> = new Schema({
         type: Types.ObjectId,
         ref: "CustomAlert"
     }]
-}, {timestamps: true})
+}, {timestamps: {currentTime: () => new Date()}})
 
 
 
-export const User: mongoose.Model<IUserSchema> = mongoose.model<IUserSchema, IUserModel>("User", userSchema);
+export const User: IUserModel = mongoose.model<IUserSchema, IUserModel>("User", userSchema);
