@@ -1,5 +1,8 @@
+import axios, { AxiosResponse } from "axios";
 import mongoose from "mongoose";
 import T from "../bot";
+import { apiConfig } from "../config";
+import { APISymbolResponse } from "../types";
 
 
 
@@ -16,4 +19,21 @@ export const connectDB = async (): Promise<boolean> => {
         });
 
         return connection;
+};
+
+/**
+ * 
+ * @param symbol {String} 
+ * @description call to GET /api/v3/ticker/price
+ * @returns Promise<boolean>
+ */
+export const checkSymbolValidity = async (symbol: string): Promise<boolean> => {
+    let response: AxiosResponse<APISymbolResponse> = await axios.get(`${apiConfig.baseURL}${apiConfig.marketPriceEndpoint}`, {params: {symbol}});
+    
+    // check if symbol is valid
+    if (!response.data.symbol) {
+        return false;
+    } 
+
+    return true;
 };

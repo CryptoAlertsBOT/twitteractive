@@ -18,8 +18,10 @@ export class IncomingRequest {
         this.username = accountName;
         this.screenName = screenName;
         this.text = text;
-        this.reTweeted = reTweeted
-        this.commandType = type == null ? CommandType.UNSET : type
+        this.reTweeted = reTweeted;
+        this.commandType = type == null ? CommandType.UNSET : type;
+
+        // log
         this.log()
     }
 

@@ -1,8 +1,7 @@
-import mongoose from "mongoose";
 import T from "../../bot";
+import { checkSymbolValidity } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { IUserSchema } from "../../models/User/types";
 import { CommandType, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
@@ -28,7 +27,6 @@ export class AddRequest extends IncomingRequest {
         // set symbol to the first recorded hashtag.
         this.symbol = this.hashtags[0];
 
-        // validate symbol.
     }
 
 
@@ -47,7 +45,14 @@ export class AddRequest extends IncomingRequest {
         // validate user
         let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
 
-        // create symbol if not exists in `symbol` collection.
+        // check if symbol is a valid symbol
+        if (!await checkSymbolValidity(this.symbol)) {
+
+            console.log("Symbol doesn't exist");
+            return false;
+        }
+
+        // check if already in DB.
         let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
         
         try {
