@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import T from "../bot";
 import { apiConfig } from "../config";
 import { APISymbolResponse } from "../types";
+import { InvalidRequestType } from "../types/twitter";
 
 
 
@@ -36,4 +37,30 @@ export const checkSymbolValidity = async (symbol: string): Promise<boolean> => {
     } 
 
     return true;
+};
+
+/**
+ * @description Controller to send messages to USER.
+ * @param userID Twitter ID
+ * @param text Message to send
+ */
+export const sendMessageToUser = (userID: string, text:string) => {
+    T.post('direct_messages/events/new', 
+            {//@ts-ignore
+                event: {
+                    type: 'message_create',
+                    message_create: {
+                        target: {
+                            recipient_id: userID
+                        },
+                        message_data: { text }
+                    }
+                }
+            }, 
+            (err, data, response) => {
+                if (err) {
+                    console.log('ERROR SENDING MESSAGE', err);
+                }
+            }
+        )
 };

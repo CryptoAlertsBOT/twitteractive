@@ -1,7 +1,9 @@
 import T from "../../bot";
+import { sendMessageToUser } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { CommandType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { INVALID_COMMAND_TEXT, INVALID_SYMBOL_TEXT, MULTIPLE_COMMANDS_TEXT, UNKNOWN_ERROR } from "../../types/constants";
+import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
 
 export class IncomingRequest {
     readonly tweetID: string;
@@ -102,6 +104,37 @@ export class IncomingRequest {
                             removealertKeywordRegex.test(text) ? CommandType.REMOVEALERT : CommandType.UNSET
 
         return commandType;
+    }
+
+    /**
+     * classes/IncomingRequest
+     * @description notify user of an invalid command or request.
+     * @param type {Enum} Type of invalidity.
+     */
+    public notifyInvalidRequest(type: InvalidRequestType, customText?: string): void {
+
+        // Switch case
+        switch(type) {
+            case InvalidRequestType.INVALID_COMMAND:
+                sendMessageToUser(this.userID, INVALID_COMMAND_TEXT);
+                break;
+
+            case InvalidRequestType.MULTIPLE_COMMANDS:
+                sendMessageToUser(this.userID, MULTIPLE_COMMANDS_TEXT);
+                break;
+
+            case InvalidRequestType.INVALID_SYMBOL:
+                customText ? sendMessageToUser(this.userID, customText) : sendMessageToUser(this.userID, INVALID_SYMBOL_TEXT);
+                break;
+
+            case InvalidRequestType.UNKNOWN:
+                sendMessageToUser(this.userID, UNKNOWN_ERROR);
+                break;
+                
+            default:
+                break;
+        }
+
     }
 
     public log(): void {

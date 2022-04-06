@@ -58,6 +58,7 @@ app.listen(port, async () => {
                 isRetweeted
             );
 
+            // Process Request.
             request.addSubscription();
             
         } else if (commandType == CommandType.REMOVE) {

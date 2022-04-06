@@ -10,6 +10,16 @@ export enum CommandType {
     REMOVEALERT = "removealert"
 }
 
+/**
+ * Invalid Request Types
+ */
+export enum InvalidRequestType {
+    MULTIPLE_COMMANDS="MULTIPLE_COMMANDS",
+    INVALID_COMMAND="INVALID_COMMAND",
+    INVALID_SYMBOL="INVALID_SYMBOL",
+    UNKNOWN="UNKNOWN",
+}
+
 // fill this from entity object blueprint later.
 export type TweetEntityObject = {
 

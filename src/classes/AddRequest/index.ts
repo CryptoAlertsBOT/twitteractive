@@ -1,8 +1,8 @@
 import T from "../../bot";
-import { checkSymbolValidity } from "../../controllers";
+import { checkSymbolValidity, sendMessageToUser } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { CommandType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -48,31 +48,41 @@ export class AddRequest extends IncomingRequest {
         // check if symbol is a valid symbol
         if (!await checkSymbolValidity(this.symbol)) {
 
-            console.log("Symbol doesn't exist");
+            //notify user
+            const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
+            this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
             return false;
         }
 
         // check if already in DB.
         let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
-        
+        let updatedUser;
+        let updatedSymbol;
         try {
             
-            let updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
-            let updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
-
-            console.log("updated_user ", updatedUser);
-            console.log("updated symbol ", updatedSymbol);
+            updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
+            updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
 
         } catch (e: unknown) {
-            console.log(e);
+            
+            this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
             return false;
         }
 
-        // like tweet
-        this.likeTweet();
-        // Send acknowledgement
-        this.sendAddAck()
-        return true;
+        if (updatedSymbol && updatedUser) {
+
+            // like tweet
+            this.likeTweet();
+            // Send acknowledgement
+            this.sendAddAck()
+            return true;
+
+        } else {
+                
+            this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+            return false;
+        }
+        
     }
 
     /**
@@ -81,27 +91,7 @@ export class AddRequest extends IncomingRequest {
      */
     
     private sendAddAck(): void {
-        T.post('direct_messages/events/new', 
-            {//@ts-ignore
-                event: {
-                    type: 'message_create',
-                    message_create: {
-                        target: {
-                            recipient_id: this.userID
-                        },
-                        message_data: {
-                            text: `Subscription added for ${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.` 
-                        }
-                    }
-                }
-            }, 
-            (err, data, response) => {
-                if (!err) {
-                    console.log("Message sent".yellow);
-                } else {
-                    console.log(err);
-                }
-            }
-        )
+        const text: string = `Subscription added for ${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
+        sendMessageToUser(this.userID, text);
     }
 }
