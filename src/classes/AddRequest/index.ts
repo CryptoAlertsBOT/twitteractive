@@ -1,6 +1,11 @@
+import { AxiosResponse } from "axios";
+import mongodb from "mongodb";
+import mongoose from "mongoose";
+import T from "../../bot";
 import { getBinanceData, sendMessageToUser } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
+import { APISymbolResponse } from "../../types";
 import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
@@ -35,67 +40,64 @@ export class AddRequest extends IncomingRequest {
      * @params User - this.userID
      * 
      * @summary Must add the SYMBOL given to the `user.subscriptions` collection.
-     * on Success trigger this.sendAck()
+     * on Success trigger this.sendAddAck()
      * 
      * @returns Promise<boolean>
      */
 
-    public async addSubscription(): Promise<boolean> {
+     public async addSubscription(): Promise<boolean> {
         // validate user
         let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
 
         // check if symbol is a valid symbol
-        const data: Promise<Response | null> = getBinanceData(this.symbol)
+        const response: Promise<AxiosResponse<APISymbolResponse> | null> = getBinanceData(this.symbol)
         let isValidSymbol = true;
-        data
-            .then((res) => res?.json())
-            .then(async (data) => {
-                if (data.msg) {
-                    isValidSymbol = false;
-                }
+        response.then(async (res) => {
+            if(res && res.data.msg) {
+                isValidSymbol = false;
+            }
 
-                if (!isValidSymbol) {
+            if (!isValidSymbol) {
 
-                    //notify user
-                    const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
-                    this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
+                //notify user
+                const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
+                this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
+                return false;
+            }
+    
+            // check if already in DB.
+            let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
+            
+            try {
+                // check if already present
+                const isInArray = user.get('subscriptions').some((sub: mongoose.Types.ObjectId) => {
+                    return sub.equals(symbol.get("_id"));
+                });
+    
+                if (isInArray) {
+                    sendMessageToUser(this.userID, `${this.symbol} is already added to your subscriptions!`);
                     return false;
                 }
-        
-                // check if already in DB.
-                let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
-                let updatedUser;
-                let updatedSymbol;
-                try {
-                    
-                    updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
-                    updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
-        
-                } catch (e: unknown) {
-                    
-                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
-                    return false;
-                }
-        
-                if (updatedSymbol && updatedUser) {
-        
-                    // like tweet
-                    this.likeTweet();
-                    // Send acknowledgement
-                    this.sendAddAck()
-                    return true;
-        
-                } else {
-                        
-                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
-                    return false;
-                }
+    
+                await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: symbol._id}}, {upsert: true}).exec();
+                await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {users: user._id}}, {upsert: true}).exec();
+                
+                // like tweet
+                this.likeTweet();
+                // Send acknowledgement
+                this.sendAddAck()
+                return true;
+    
+            } catch (e: unknown) {
+                
+                this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+                return false;
+            }
+        });
 
-                ;
-            })
-        return false
-        
+        return false;
     }
+
 
     /**
      * @description Sends a notification to the user regarding the subscription add event.

@@ -12,6 +12,7 @@ const SymbolSchema: Schema<ISymbolSchema> = new Schema({
     },
     users: [{
         type: Types.ObjectId,
+        unique: true,
         ref: "User"
     }]
 }, {timestamps: {currentTime: () => new Date()}})

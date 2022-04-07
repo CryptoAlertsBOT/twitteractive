@@ -1,5 +1,5 @@
 export interface IPricePayload {
-    symbol: String,
+    symbol: string,
     price: number
 }
 
@@ -10,4 +10,7 @@ export interface IConfig {
 export type APISymbolResponse = {
     symbol: string,
     price: string,
+} & {
+    code: number,
+    msg: string
 }
