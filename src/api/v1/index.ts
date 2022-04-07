@@ -26,8 +26,22 @@ export const router: Router = Router();
  * If so, check if user needs to be alerted.
  */
 
-router.post('/payload', (req: Request, res: Response) => {
+router.post('/alertPayload', (req: Request, res: Response) => {
     const payload: IPricePayload = req.body;
 
+    // Check if symbol is present in DB. If not, add.
+    // 
     // Query payload with database.
 });
+
+
+/**
+ * Threshold payload
+ */
+
+router.post('/thresholdPayload', (req: Request, res: Response) => {
+    const symbolToNotify: string = req.body.symbol;
+
+    // Query for symbol in DB
+    // Notify all users associated with its subscriptions.
+}); 
