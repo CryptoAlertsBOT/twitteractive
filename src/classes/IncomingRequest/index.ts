@@ -86,23 +86,23 @@ export class IncomingRequest {
      */
 
     public static validateRequest(text: string): CommandType[] {
-        var commands = [];
+        let commands: CommandType[] = [];
 
-        var addKeyword = 'add'
-        var addKeywordRegex = new RegExp("(^| +)" + addKeyword + "( +|[.])", "i");
-        var isAddRequest = addKeywordRegex.test(text)
+        const addKeyword = 'add'
+        const addKeywordRegex = new RegExp("(^| +)" + addKeyword + "( +|[.])", "i");
+        const isAddRequest = addKeywordRegex.test(text)
 
-        var removeKeyword = 'remove'
-        var removeKeywordRegex = new RegExp("(^| +)" + removeKeyword + "( +|[.])", "i");
-        var isRemoveRequest = removeKeywordRegex.test(text)
+        const removeKeyword = 'remove'
+        const removeKeywordRegex = new RegExp("(^| +)" + removeKeyword + "( +|[.])", "i");
+        const isRemoveRequest = removeKeywordRegex.test(text)
 
-        var setalertKeyword = 'setalert'
-        var setalertKeywordRegex = new RegExp("(^| +)" + setalertKeyword + "( +|[.])", "i");
-        var isSetAlertRequest = setalertKeywordRegex.test(text)
+        const setalertKeyword = 'setalert'
+        const setalertKeywordRegex = new RegExp("(^| +)" + setalertKeyword + "( +|[.])", "i");
+        const isSetAlertRequest = setalertKeywordRegex.test(text)
 
-        var removealertKeyword = 'removealert'
-        var removealertKeywordRegex = new RegExp("(^| +)" + removealertKeyword + "( +|[.])", "i");
-        var isRemoveAlertRequest = removealertKeywordRegex.test(text)
+        const removealertKeyword = 'removealert'
+        const removealertKeywordRegex = new RegExp("(^| +)" + removealertKeyword + "( +|[.])", "i");
+        const isRemoveAlertRequest = removealertKeywordRegex.test(text)
 
         if(isAddRequest) {
             commands.push(CommandType.ADD)
