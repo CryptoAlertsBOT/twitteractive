@@ -7,6 +7,7 @@ import { connectDB } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
 import { AddRequest } from "./classes/AddRequest";
 import { CommandType, InvalidRequestType } from "./types/twitter";
+import { RemoveRequest } from "./classes/RemoveRequest";
 
 const port = env.SERVER_PORT!;
 
@@ -43,10 +44,11 @@ app.listen(port, async () => {
          */
 
 
-        const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText)
+        const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText);
 
+        // catch invalid commands
         if( commandType.length != 1 ) {
-            // Call Invalid Request
+            
             let request: IncomingRequest = new IncomingRequest(
                 tweetID,
                 userID,
@@ -56,10 +58,13 @@ app.listen(port, async () => {
                 isRetweeted,
                 CommandType.UNSET
             )
-            request.notifyInvalidRequest(InvalidRequestType.INVALID_COMMAND, "Please enter a valid command")
+            
+            // Call Invalid Request
+            request.notifyInvalidRequest(InvalidRequestType.INVALID_COMMAND, "Please enter a valid command");
+
         } else if(commandType[0] == CommandType.ADD) {
             // Add Request
-            let add_request = new AddRequest(
+            let addRequest: AddRequest = new AddRequest(
                 tweetID,
                 userID,
                 accountName,
@@ -70,10 +75,23 @@ app.listen(port, async () => {
             );
 
             // Process Request.
-            add_request.addSubscription();
+            addRequest.addSubscription();
             
         } else if (commandType[0] == CommandType.REMOVE) {
             // Remove Request
+            let removeRequest: RemoveRequest = new RemoveRequest(
+                tweetID,
+                userID,
+                accountName,
+                userScreenName,
+                tweetText,
+                symbolHashEntity,
+                isRetweeted
+            );
+
+            // call remove 
+            removeRequest.removeSubscription()
+
         } else if (commandType[0] == CommandType.SETALERT) {
             // Set Alert
         } else if (commandType[0] == CommandType.REMOVEALERT){

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { getBinanceData, sendMessageToUser } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
@@ -63,35 +64,37 @@ export class AddRequest extends IncomingRequest {
                 }
         
                 // check if already in DB.
-                let symbol: SymbolDocument = await IncomingRequest.validateSymbol(this.symbol);
-                let updatedUser;
-                let updatedSymbol;
+                let symbol: SymbolDocument = await IncomingRequest.validateSymbolAndCreate(this.symbol);
+                
                 try {
                     
-                    updatedUser = await User.findByIdAndUpdate(user.get("_id"), {$push: {subscriptions: symbol._id}}, {new: true}).exec();
-                    updatedSymbol = await Symbol.findByIdAndUpdate(symbol.get("_id"), {$push: {users: user._id}}, {new: true}).exec();
+                   // check if already present
+                    const isInArray = user.get('subscriptions').some((sub: mongoose.Types.ObjectId) => {
+                        return sub.equals(symbol.get("_id"));
+                    });
+
+                    if (isInArray) {
+                        sendMessageToUser(this.userID, `${this.symbol} is already added to your subscriptions!`);
+                        return false;
+                    }
+
+                    // update symbol list 
+                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: symbol._id}}, {upsert: true}).exec();
+                    await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {users: user._id}}, {upsert: true}).exec();
+
+                    // like tweet
+                    this.likeTweet();
+
+                    // Send acknowledgement
+                    this.sendAddAck()
+
+                    return true;
         
                 } catch (e: unknown) {
                     
                     this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
                     return false;
                 }
-        
-                if (updatedSymbol && updatedUser) {
-        
-                    // like tweet
-                    this.likeTweet();
-                    // Send acknowledgement
-                    this.sendAddAck()
-                    return true;
-        
-                } else {
-                        
-                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
-                    return false;
-                }
-
-                ;
             })
         return false
         
