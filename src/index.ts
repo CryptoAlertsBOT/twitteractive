@@ -6,7 +6,7 @@ import T from "./bot";
 import { connectDB } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
 import { AddRequest } from "./classes/AddRequest";
-import { CommandType } from "./types/twitter";
+import { CommandType, InvalidRequestType } from "./types/twitter";
 
 const port = env.SERVER_PORT!;
 
@@ -44,11 +44,23 @@ app.listen(port, async () => {
          */
 
 
-        const commandType = IncomingRequest.validateRequest(tweetText)
+        const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText)
 
-        if(commandType == CommandType.ADD) {
+        if( commandType.length != 1 ) {
+            // Call Invalid Request
+            let request: IncomingRequest = new IncomingRequest(
+                tweetID,
+                userID,
+                accountName,
+                userScreenName,
+                tweetText,
+                isRetweeted,
+                CommandType.UNSET
+            )
+            request.notifyInvalidRequest(InvalidRequestType.INVALID_COMMAND, "Please enter a valid command")
+        } else if(commandType[0] == CommandType.ADD) {
             // Add Request
-            let request: AddRequest = new AddRequest(
+            let add_request = new AddRequest(
                 tweetID,
                 userID,
                 accountName,
@@ -59,15 +71,15 @@ app.listen(port, async () => {
             );
 
             // Process Request.
-            request.addSubscription();
+            add_request.addSubscription();
             
-        } else if (commandType == CommandType.REMOVE) {
+        } else if (commandType[0] == CommandType.REMOVE) {
             // Remove Request
-        } else if (commandType == CommandType.SETALERT) {
+        } else if (commandType[0] == CommandType.SETALERT) {
             // Set Alert
-        } else if (commandType == CommandType.REMOVEALERT){
+        } else if (commandType[0] == CommandType.REMOVEALERT){
             // Remove Alert
-        } 
+        }
 
      });
 
