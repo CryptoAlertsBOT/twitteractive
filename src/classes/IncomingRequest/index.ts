@@ -7,7 +7,7 @@ import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from ".
 
 export class IncomingRequest {
     readonly tweetID: string;
-    readonly userID: string;
+    public readonly userID: string;
     readonly username: string;
     readonly screenName: string;
     readonly text: string;
@@ -82,28 +82,42 @@ export class IncomingRequest {
      * If doesn't match any of the CommandTypes, set as new IncomingRequest(). 
      * Otherwise, for add - new AddRequest() etc..
      * 
-     * @returns CommandType enum
+     * @returns CommandType[] enum
      */
 
-    public static validateRequest(text: string): CommandType {
+    public static validateRequest(text: string): CommandType[] {
+        var commands = [];
+
         var addKeyword = 'add'
         var addKeywordRegex = new RegExp("(^| +)" + addKeyword + "( +|[.])", "i");
+        var isAddRequest = addKeywordRegex.test(text)
 
         var removeKeyword = 'remove'
         var removeKeywordRegex = new RegExp("(^| +)" + removeKeyword + "( +|[.])", "i");
+        var isRemoveRequest = removeKeywordRegex.test(text)
 
         var setalertKeyword = 'setalert'
         var setalertKeywordRegex = new RegExp("(^| +)" + setalertKeyword + "( +|[.])", "i");
+        var isSetAlertRequest = setalertKeywordRegex.test(text)
 
         var removealertKeyword = 'removealert'
         var removealertKeywordRegex = new RegExp("(^| +)" + removealertKeyword + "( +|[.])", "i");
+        var isRemoveAlertRequest = removealertKeywordRegex.test(text)
 
-        const commandType = addKeywordRegex.test(text) ? CommandType.ADD :
-                            removeKeywordRegex.test(text) ? CommandType.REMOVE :
-                            setalertKeywordRegex.test(text) ? CommandType.SETALERT :
-                            removealertKeywordRegex.test(text) ? CommandType.REMOVEALERT : CommandType.UNSET
+        if(isAddRequest) {
+            commands.push(CommandType.ADD)
+        }
+        if(isRemoveRequest) {
+            commands.push(CommandType.REMOVE)
+        }
+        if(isSetAlertRequest) {
+            commands.push(CommandType.SETALERT)
+        }
+        if(isRemoveAlertRequest) {
+            commands.push(CommandType.REMOVEALERT)
+        }
 
-        return commandType;
+        return commands;
     }
 
     /**
