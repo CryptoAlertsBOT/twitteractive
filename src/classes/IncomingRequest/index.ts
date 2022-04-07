@@ -82,7 +82,7 @@ export class IncomingRequest {
      * If doesn't match any of the CommandTypes, set as new IncomingRequest(). 
      * Otherwise, for add - new AddRequest() etc..
      * 
-     * @returns CommandType enum
+     * @returns CommandType[] enum
      */
 
     public static validateRequest(text: string): CommandType[] {
