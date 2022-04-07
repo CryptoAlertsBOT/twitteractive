@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import mongoose from "mongoose";
 import T from "../bot";
+import fetch from "node-fetch";
 
 
 
@@ -25,10 +26,15 @@ export const connectDB = async (): Promise<boolean> => {
  * @description call to GET /api/v3/ticker/price
  * @returns Promise<boolean>
  */
-export const getBinanceData = async (symbol: string): Promise<AxiosResponse | null>  => {
+export const getBinanceData = async (symbol: string): Promise<Response | null>  => {
     symbol = symbol.toUpperCase();
     try {
-        return axios.get('https://api.binance.com/api/v3/ticker/price', {params: {symbol}});
+        let url = new URL('https://api.binance.com/api/v3/ticker/price');
+        var params = {symbol};
+        url.search = new URLSearchParams(params).toString();
+        //@ts-ignore
+        return fetch(url);
+        
 
     } catch(err) {
         console.log(err)
