@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import { ISymbolSchema } from "../models/Symbol/types";
 import { IUserSchema } from "../models/User/types"
+import { ICustomAlertSchema } from "../models/CustomAlert/types"
 
 export enum CommandType {
     UNSET= "none",
@@ -27,3 +28,4 @@ export type TweetEntityObject = {
 
 export type UserDocument = mongoose.Document<IUserSchema>;
 export type SymbolDocument = mongoose.Document<ISymbolSchema>;
+export type AlertDocument = mongoose.Document<ICustomAlertSchema>;

@@ -6,6 +6,7 @@ import T from "./bot";
 import { connectDB } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
 import { AddRequest } from "./classes/AddRequest";
+import { SetAlert } from "./classes/SetAlert";
 import { CommandType, InvalidRequestType } from "./types/twitter";
 import { RemoveRequest } from "./classes/RemoveRequest";
 
@@ -94,6 +95,18 @@ app.listen(port, async () => {
 
         } else if (commandType[0] == CommandType.SETALERT) {
             // Set Alert
+            let setAlert:  SetAlert = new SetAlert(
+                tweetID,
+                userID,
+                accountName,
+                userScreenName,
+                tweetText,
+                symbolHashEntity,
+                isRetweeted
+            );
+
+            // Process Request.
+            setAlert.addAlert();
         } else if (commandType[0] == CommandType.REMOVEALERT){
             // Remove Alert
         }

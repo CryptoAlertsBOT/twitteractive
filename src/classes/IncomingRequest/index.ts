@@ -1,9 +1,10 @@
 import T from "../../bot";
 import { sendMessageToUser } from "../../controllers";
+import { CustomAlert } from "../../models/CustomAlert";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
 import { INVALID_COMMAND_TEXT, INVALID_SYMBOL_TEXT, MULTIPLE_COMMANDS_TEXT, UNKNOWN_ERROR } from "../../types/constants";
-import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { AlertDocument, CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
 
 export class IncomingRequest {
     readonly tweetID: string;
@@ -29,6 +30,22 @@ export class IncomingRequest {
 
     public static extractSymbols(hashtags: Array<Object>): Array<string> {
         return hashtags.map((tag: any) => tag.text);
+    }
+
+    public static extractPrice(text: string): number{
+        const regex = /[+-]?\d+(\.\d+)?/g;
+        const textArr = text.split("-p")
+        let price: string | any[] = [];
+
+        if(textArr.length > 1) {
+            price = textArr[1].match(regex).map(function(v) { return parseFloat(v); });
+        }
+
+        if (price.length > 0) {
+            return price[0]
+        }
+        
+        return 0;
     }
 
     /**
