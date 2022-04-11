@@ -18,6 +18,7 @@ export class SetAlert extends IncomingRequest {
     private hashtags: Array<string>;
     private symbol: string;
     private trigger_price: number;
+    private price_when_set!: number;
 
     constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>, reTweeted: boolean) {
 
@@ -85,12 +86,14 @@ export class SetAlert extends IncomingRequest {
                     // update symbol list 
                     await User.findOneAndUpdate({_id: user._id}, {$addToSet: {alerts: symbol._id}}, {upsert: true}).exec();
                     await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {users: user._id}}, {upsert: true}).exec();
+
+                    this.price_when_set = data.price;
                     
                     const newAlert: AlertDocument = new CustomAlert({
                         symbol,
                         user,
                         trigger_price: this.trigger_price,
-                        price_when_set: data.price,
+                        price_when_set: this.price_when_set,
                     })
         
                     newAlert.save();
@@ -119,7 +122,7 @@ export class SetAlert extends IncomingRequest {
      */
     
     private sendAddAck(): void {
-        const text: string = `Alert added for ${this.symbol}, ${this.username}. You will be notified when it hits ${this.symbol}.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
+        const text: string = `Alert added for ${this.symbol}, ${this.username}. You will be notified when it hits s${this.trigger_price}.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
         sendMessageToUser(this.userID, text);
     }
 }
