@@ -50,18 +50,8 @@ app.listen(port, async () => {
         // catch invalid commands
         if( commandType.length != 1 ) {
             
-            let request: IncomingRequest = new IncomingRequest(
-                tweetID,
-                userID,
-                accountName,
-                userScreenName,
-                tweetText,
-                isRetweeted,
-                CommandType.UNSET
-            )
-            
             // Call Invalid Request
-            request.notifyInvalidRequest(InvalidRequestType.INVALID_COMMAND, "Please enter a valid command");
+            IncomingRequest.notifyInvalidRequest(userID, InvalidRequestType.INVALID_COMMAND, "Please enter a valid command");
 
         } else if(commandType[0] == CommandType.ADD) {
             // Add Request

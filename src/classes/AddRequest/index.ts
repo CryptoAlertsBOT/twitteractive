@@ -59,7 +59,7 @@ export class AddRequest extends IncomingRequest {
 
                     //notify user
                     const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
-                    this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
+                    IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.INVALID_SYMBOL, text);
                     return false;
                 }
         
@@ -92,7 +92,7 @@ export class AddRequest extends IncomingRequest {
         
                 } catch (e: unknown) {
                     
-                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+                    IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.UNKNOWN);
                     return false;
                 }
             })
