@@ -46,12 +46,12 @@ app.listen(port, async () => {
 
 
         const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText);
-
+        console.log(commandType)
         // catch invalid commands
         if( commandType.length != 1 ) {
             
             // Call Invalid Request
-            IncomingRequest.notifyInvalidRequest(userID, InvalidRequestType.INVALID_COMMAND, "Please enter a valid command");
+            IncomingRequest.notifyInvalidRequest(userID, InvalidRequestType.INVALID_COMMAND, "Please enter a valid command.\n\nFor a valid command syntax reference, please visit our documentation.");
 
         } else if(commandType[0] == CommandType.ADD) {
             // Add Request
