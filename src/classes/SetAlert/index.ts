@@ -34,6 +34,22 @@ export class SetAlert extends IncomingRequest {
 
     }
 
+    public static extractPrice(text: string): number{
+        const regex = /[+-]?\d+(\.\d+)?/g;
+        const textArr = text.split("-p")
+        let price: string | any[] = [];
+
+        if(textArr.length > 1) {
+            price = textArr[1].match(regex).map(function(v) { return parseFloat(v); });
+        }
+
+        if (price.length > 0) {
+            return price[0]
+        }
+        
+        return 0;
+    }
+
 
     /**
      * @description Function to add the subscription request to the database.

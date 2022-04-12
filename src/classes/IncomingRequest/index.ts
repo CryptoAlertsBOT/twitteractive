@@ -32,21 +32,7 @@ export class IncomingRequest {
         return hashtags.map((tag: any) => tag.text);
     }
 
-    public static extractPrice(text: string): number{
-        const regex = /[+-]?\d+(\.\d+)?/g;
-        const textArr = text.split("-p")
-        let price: string | any[] = [];
 
-        if(textArr.length > 1) {
-            price = textArr[1].match(regex).map(function(v) { return parseFloat(v); });
-        }
-
-        if (price.length > 0) {
-            return price[0]
-        }
-        
-        return 0;
-    }
 
     /**
      * @description Check if user exists in DB, if not - add user to DB.
