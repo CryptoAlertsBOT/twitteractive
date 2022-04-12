@@ -43,7 +43,7 @@ export class AddRequest extends IncomingRequest {
 
     public async addSubscription(): Promise<boolean> {
         // validate user
-        let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
+        let user: UserDocument = await IncomingRequest.validateUserAndCreate(this.userID, this.username, this.screenName);
 
         // check if symbol is a valid symbol
         const data: Promise<Response | null> = getBinanceData(this.symbol)

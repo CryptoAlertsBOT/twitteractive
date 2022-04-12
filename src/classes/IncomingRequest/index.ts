@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import T from "../../bot";
 import { sendMessageToUser } from "../../controllers";
 import { CustomAlert } from "../../models/CustomAlert";
@@ -42,7 +43,7 @@ export class IncomingRequest {
      * @returns Promise<boolean>
      */
 
-    public static async validateUser(twitterID: string, username: string, screen_name: string): Promise<UserDocument> {
+    public static async validateUserAndCreate(twitterID: string, username: string, screen_name: string): Promise<UserDocument> {
         let currentUser: UserDocument | null = await User.findOne({twitterID}).exec();
 
         if (!currentUser) {

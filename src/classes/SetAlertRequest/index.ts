@@ -12,7 +12,7 @@ import { IncomingRequest } from "../IncomingRequest";
  * @params SYMBOL symbol to add to user subscription.
  */
 
-export class SetAlert extends IncomingRequest {
+export class SetAlertRequest extends IncomingRequest {
 
     // public commandType: CommandType = CommandType.ADD;
     private hashtags: Array<string>;
@@ -30,7 +30,7 @@ export class SetAlert extends IncomingRequest {
         // set symbol to the first recorded hashtag.
         this.symbol = this.hashtags[0];
 
-        this.trigger_price = IncomingRequest.extractPrice(text);
+        this.trigger_price = SetAlertRequest.extractPrice(text);
 
     }
 
@@ -64,7 +64,7 @@ export class SetAlert extends IncomingRequest {
 
     public async addAlert(): Promise<boolean> {
         // validate user
-        let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
+        let user: UserDocument = await IncomingRequest.validateUserAndCreate(this.userID, this.username, this.screenName);
 
         // check if symbol is a valid symbol
         const data: Promise<Response | null> = getBinanceData(this.symbol)
@@ -78,47 +78,44 @@ export class SetAlert extends IncomingRequest {
 
                 if (!isValidSymbol) {
 
+                    // Set current price 
+                    this.price_when_set = data.price;
+
                     //notify user
                     const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
                     this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
                     return false;
                 }
-        
-                // check if already in DB.
-                let symbol: SymbolDocument = await IncomingRequest.validateSymbolAndCreate(this.symbol);
+              
                 
                 try {
-                    
-                   // check if already present
-                    const isInArray = user.get('alerts').some((sub: mongoose.Types.ObjectId) => {
-                        return sub.equals(symbol.get("_id"));
-                    });
+                    // set current price from binance data 
+                    this.price_when_set = data.price;
 
-                    if (isInArray) {
-                        sendMessageToUser(this.userID, `${this.symbol} is already added to your alerts!`);
+                    // get symbol from DB
+                    let symbol: SymbolDocument = await IncomingRequest.validateSymbolAndCreate(this.symbol);
+
+                    // check if already in DB.
+                    let alert: AlertDocument | null = await IncomingRequest.validateAlert(symbol.get("_id"), user.get("_id"), this.trigger_price, this.price_when_set);
+
+                    // If alert is null, it means that the alert already exists.
+                    // Notify user of the error.
+                    // return false.
+                    if(!alert) {
+                        sendMessageToUser(this.userID, `${this.symbol} already has a price alert set at ${this.trigger_price}!`);
                         return false;
                     }
 
-                    // update symbol list 
-                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {alerts: symbol._id}}, {upsert: true}).exec();
-                    await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {users: user._id}}, {upsert: true}).exec();
-
-                    this.price_when_set = data.price;
-                    
-                    const newAlert: AlertDocument = new CustomAlert({
-                        symbol,
-                        user,
-                        trigger_price: this.trigger_price,
-                        price_when_set: this.price_when_set,
-                    })
-        
-                    newAlert.save();
+                    // if alert is not null, a new alert has been added to the customalert database.
+                    // update the user model to include this alert in the alerts list.
+                    // update alerts list in User model
+                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {alerts: alert._id}}, {upsert: true}).exec();
 
                     // like tweet
                     this.likeTweet();
 
                     // Send acknowledgement
-                    this.sendAddAck()
+                    this.sendAddAlertAck()
 
                     return true;
         
@@ -137,8 +134,8 @@ export class SetAlert extends IncomingRequest {
      * @returns void
      */
     
-    private sendAddAck(): void {
-        const text: string = `Alert added for ${this.symbol}, ${this.username}. You will be notified when it hits s${this.trigger_price}.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
+    private sendAddAlertAck(): void {
+        const text: string = `You will be notified when ${this.symbol} hits ${this.trigger_price}, ${this.username}. \n\n Tag us and say "removealert #${this.symbol} -p ${this.trigger_price}" to remove this custom alert.`
         sendMessageToUser(this.userID, text);
     }
 }
