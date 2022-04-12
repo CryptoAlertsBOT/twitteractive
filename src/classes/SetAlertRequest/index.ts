@@ -44,7 +44,9 @@ export class SetAlertRequest extends IncomingRequest {
             if (!price) return null;
 
             // else
-            price.map((v) => { return parseFloat(v); });
+            let match: number[] = price.map((v) => { return parseFloat(v); });
+
+           if(match.length > 0) return match[0];
         }
 
         return null;
