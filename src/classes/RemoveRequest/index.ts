@@ -43,7 +43,7 @@ export class RemoveRequest extends IncomingRequest {
 
     public async removeSubscription(): Promise<boolean> {
         // validate user
-        let user: UserDocument = await IncomingRequest.validateUser(this.userID, this.username, this.screenName);
+        let user: UserDocument = await IncomingRequest.validateUserAndCreate(this.userID, this.username, this.screenName);
 
         // check if symbol is valid
         let symbol: SymbolDocument | null = await IncomingRequest._checkIfValidSymbol(this.symbol);
@@ -51,7 +51,7 @@ export class RemoveRequest extends IncomingRequest {
         if(!symbol) {
             //notify user
             const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
-            this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
+            IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.INVALID_SYMBOL, text);
             return false;
         }
 
@@ -82,7 +82,7 @@ export class RemoveRequest extends IncomingRequest {
 
         } catch (e: unknown) {
             
-            this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+            IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.UNKNOWN);
             return false;
         }
         

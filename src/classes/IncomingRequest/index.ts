@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import T from "../../bot";
 import { sendMessageToUser } from "../../controllers";
+import { CustomAlert } from "../../models/CustomAlert";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { INVALID_COMMAND_TEXT, INVALID_SYMBOL_TEXT, MULTIPLE_COMMANDS_TEXT, UNKNOWN_ERROR } from "../../types/constants";
-import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { INVALID_COMMAND_TEXT, INVALID_SYMBOL_TEXT, INVALID_TRIGGER_PRICE_TEXT, MULTIPLE_COMMANDS_TEXT, UNKNOWN_ERROR } from "../../types/constants";
+import { AlertDocument, CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
 
 export class IncomingRequest {
     readonly tweetID: string;
@@ -31,6 +33,8 @@ export class IncomingRequest {
         return hashtags.map((tag: any) => tag.text);
     }
 
+
+
     /**
      * @description Check if user exists in DB, if not - add user to DB.
      * @param twitterID - twitter ID
@@ -39,7 +43,7 @@ export class IncomingRequest {
      * @returns Promise<boolean>
      */
 
-    public static async validateUser(twitterID: string, username: string, screen_name: string): Promise<UserDocument> {
+    public static async validateUserAndCreate(twitterID: string, username: string, screen_name: string): Promise<UserDocument> {
         let currentUser: UserDocument | null = await User.findOne({twitterID}).exec();
 
         if (!currentUser) {
@@ -76,6 +80,8 @@ export class IncomingRequest {
 
         return currentSymbol;
     }
+
+
 
     
     /**
@@ -137,24 +143,27 @@ export class IncomingRequest {
      * @description notify user of an invalid command or request.
      * @param type {Enum} Type of invalidity.
      */
-    public notifyInvalidRequest(type: InvalidRequestType, customText?: string): void {
+    public static notifyInvalidRequest(userID: string, type: InvalidRequestType, customText?: string): void {
 
         // Switch case
         switch(type) {
             case InvalidRequestType.INVALID_COMMAND:
-                sendMessageToUser(this.userID, INVALID_COMMAND_TEXT);
+                customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, INVALID_COMMAND_TEXT);
                 break;
 
             case InvalidRequestType.MULTIPLE_COMMANDS:
-                sendMessageToUser(this.userID, MULTIPLE_COMMANDS_TEXT);
+                customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, MULTIPLE_COMMANDS_TEXT);
                 break;
 
             case InvalidRequestType.INVALID_SYMBOL:
-                customText ? sendMessageToUser(this.userID, customText) : sendMessageToUser(this.userID, INVALID_SYMBOL_TEXT);
+                customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, INVALID_SYMBOL_TEXT);
                 break;
 
+            case InvalidRequestType.INVALID_TRIGGER_PRICE:
+                customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, INVALID_TRIGGER_PRICE_TEXT);
+
             case InvalidRequestType.UNKNOWN:
-                sendMessageToUser(this.userID, UNKNOWN_ERROR);
+                sendMessageToUser(userID, UNKNOWN_ERROR);
                 break;
                 
             default:

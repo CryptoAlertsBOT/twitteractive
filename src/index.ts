@@ -6,6 +6,7 @@ import T from "./bot";
 import { connectDB } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
 import { AddRequest } from "./classes/AddRequest";
+import { SetAlertRequest } from "./classes/SetAlertRequest";
 import { CommandType, InvalidRequestType } from "./types/twitter";
 import { RemoveRequest } from "./classes/RemoveRequest";
 
@@ -45,22 +46,12 @@ app.listen(port, async () => {
 
 
         const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText);
-
+        console.log(commandType)
         // catch invalid commands
         if( commandType.length != 1 ) {
             
-            let request: IncomingRequest = new IncomingRequest(
-                tweetID,
-                userID,
-                accountName,
-                userScreenName,
-                tweetText,
-                isRetweeted,
-                CommandType.UNSET
-            )
-            
             // Call Invalid Request
-            request.notifyInvalidRequest(InvalidRequestType.INVALID_COMMAND, "Please enter a valid command");
+            IncomingRequest.notifyInvalidRequest(userID, InvalidRequestType.INVALID_COMMAND, "Please enter a valid command.\n\nFor a valid command syntax reference, please visit our documentation.");
 
         } else if(commandType[0] == CommandType.ADD) {
             // Add Request
@@ -94,6 +85,18 @@ app.listen(port, async () => {
 
         } else if (commandType[0] == CommandType.SETALERT) {
             // Set Alert
+            let setAlert:  SetAlertRequest = new SetAlertRequest(
+                tweetID,
+                userID,
+                accountName,
+                userScreenName,
+                tweetText,
+                symbolHashEntity,
+                isRetweeted
+            );
+
+            // Process Request.
+            setAlert.addAlert();
         } else if (commandType[0] == CommandType.REMOVEALERT){
             // Remove Alert
         }
