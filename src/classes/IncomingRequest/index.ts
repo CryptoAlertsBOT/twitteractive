@@ -80,6 +80,40 @@ export class IncomingRequest {
         return currentSymbol;
     }
 
+        /**
+     * @description Check if symbol exists in DB, if not - add symbol to DB.
+     * @param symbol_id {ObjectID} Current symbol mongoose objectID
+     * @param  user_id {ObjectID} Current user mongoose objectId
+     * @param  t_price {Number} Trigegr price
+     * @param  c_price {Number} Current Price
+     */
+
+         public static async validateAlert(symbol_id: mongoose.Types.ObjectId, user_id: mongoose.Types.ObjectId, t_price: number, c_price: number): Promise<AlertDocument | null>  {
+            let currentAlert: AlertDocument | null = await CustomAlert.findOne({
+                symbol: symbol_id, 
+                user: user_id,
+                trigger_price: t_price
+            }).exec();
+            
+            // If alert already exists, we want to send back null.
+            // This is so that we can notify the user that the alert is already set for that symbol at that price.
+            if (currentAlert) {
+                return null;
+            }
+
+            const newAlert: AlertDocument = new CustomAlert({ 
+                symbol: symbol_id, 
+                user: user_id,
+                trigger_price: t_price,
+                price_when_set: c_price
+            });
+
+            newAlert.save();
+            return newAlert;
+    
+            
+        }
+
     
     /**
      * @description Check if symbol exists in DB, if not - add symbol to DB.
