@@ -17,7 +17,7 @@ export class SetAlertRequest extends IncomingRequest {
     // public commandType: CommandType = CommandType.ADD;
     private hashtags: Array<string>;
     private symbol: string;
-    private trigger_price: number;
+    private trigger_price: number | null;
     private price_when_set!: number;
 
     constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>, reTweeted: boolean) {
@@ -34,20 +34,20 @@ export class SetAlertRequest extends IncomingRequest {
 
     }
 
-    public static extractPrice(text: string): number{
-        const regex = /[+-]?\d+(\.\d+)?/g;
-        const textArr = text.split("-p")
-        let price: string | any[] = [];
+    public static extractPrice(text: string): number | null{
+        const regex: RegExp = /[+-]?\d+(\.\d+)?/g;
+        const textArr: string[] = text.split("-p")
+        let price: RegExpMatchArray | null;
 
         if(textArr.length > 1) {
-            price = textArr[1].match(regex).map(function(v) { return parseFloat(v); });
+            price = textArr[1].match(regex);
+            if (!price) return null;
+
+            // else
+            price.map((v) => { return parseFloat(v); });
         }
 
-        if (price.length > 0) {
-            return price[0]
-        }
-        
-        return 0;
+        return null;
     }
 
 
@@ -63,6 +63,13 @@ export class SetAlertRequest extends IncomingRequest {
      */
 
     public async addAlert(): Promise<boolean> {
+        // check if trigger price is valid
+        if(!this.trigger_price) {
+            IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.INVALID_TRIGGER_PRICE);
+            return false;
+        }
+
+
         // validate user
         let user: UserDocument = await IncomingRequest.validateUserAndCreate(this.userID, this.username, this.screenName);
 
@@ -83,7 +90,7 @@ export class SetAlertRequest extends IncomingRequest {
 
                     //notify user
                     const text = `${this.symbol} is not a valid market ticker. Please try again with a valid one!\n\nExamples of valid tickers: BTCUSDT, ETHUSDT, ETHBTC etc.`;
-                    this.notifyInvalidRequest(InvalidRequestType.INVALID_SYMBOL, text);
+                    IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.INVALID_SYMBOL, text);
                     return false;
                 }
               
@@ -96,7 +103,7 @@ export class SetAlertRequest extends IncomingRequest {
                     let symbol: SymbolDocument = await IncomingRequest.validateSymbolAndCreate(this.symbol);
 
                     // check if already in DB.
-                    let alert: AlertDocument | null = await IncomingRequest.validateAlert(symbol.get("_id"), user.get("_id"), this.trigger_price, this.price_when_set);
+                    let alert: AlertDocument | null = await IncomingRequest.validateAlert(symbol.get("_id"), user.get("_id"), this.trigger_price!, this.price_when_set);
 
                     // If alert is null, it means that the alert already exists.
                     // Notify user of the error.
@@ -121,7 +128,7 @@ export class SetAlertRequest extends IncomingRequest {
         
                 } catch (e: unknown) {
                     
-                    this.notifyInvalidRequest(InvalidRequestType.UNKNOWN);
+                    IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.UNKNOWN);
                     return false;
                 }
             })
