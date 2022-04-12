@@ -6,7 +6,7 @@ import T from "./bot";
 import { connectDB } from "./controllers";
 import { IncomingRequest } from "./classes/IncomingRequest";
 import { AddRequest } from "./classes/AddRequest";
-import { SetAlert } from "./classes/SetAlert";
+import { SetAlertRequest } from "./classes/SetAlertRequest";
 import { CommandType, InvalidRequestType } from "./types/twitter";
 import { RemoveRequest } from "./classes/RemoveRequest";
 
@@ -95,7 +95,7 @@ app.listen(port, async () => {
 
         } else if (commandType[0] == CommandType.SETALERT) {
             // Set Alert
-            let setAlert:  SetAlert = new SetAlert(
+            let setAlert:  SetAlertRequest = new SetAlertRequest(
                 tweetID,
                 userID,
                 accountName,
