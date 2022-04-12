@@ -103,7 +103,7 @@ export class SetAlertRequest extends IncomingRequest {
                     let symbol: SymbolDocument = await IncomingRequest.validateSymbolAndCreate(this.symbol);
 
                     // check if already in DB.
-                    let alert: AlertDocument | null = await IncomingRequest.validateAlert(symbol.get("_id"), user.get("_id"), this.trigger_price!, this.price_when_set);
+                    let alert: AlertDocument | null = await this.validateAlert(symbol.get("_id"), user.get("_id"), this.trigger_price!, this.price_when_set);
 
                     // If alert is null, it means that the alert already exists.
                     // Notify user of the error.
@@ -134,6 +134,40 @@ export class SetAlertRequest extends IncomingRequest {
             })
         return false
         
+    }
+
+    /**
+     * @description Check if Alert exists in DB, if not - returns null. Otherwise returns the alert document.
+     * @param symbol_id {ObjectID} Current symbol mongoose objectID
+     * @param  user_id {ObjectID} Current user mongoose objectId
+     * @param  t_price {Number} Trigegr price
+     * @param  c_price {Number} Current Price
+     */
+
+    private async validateAlert(symbol_id: mongoose.Types.ObjectId, user_id: mongoose.Types.ObjectId, t_price: number, c_price: number): Promise<AlertDocument | null>  {
+        let currentAlert: AlertDocument | null = await CustomAlert.findOne({
+            symbol: symbol_id, 
+            user: user_id,
+            trigger_price: t_price
+        }).exec();
+        
+        // If alert already exists, we want to send back null.
+        // This is so that we can notify the user that the alert is already set for that symbol at that price.
+        if (currentAlert) {
+            return null;
+        }
+
+        const newAlert: AlertDocument = new CustomAlert({ 
+            symbol: symbol_id, 
+            user: user_id,
+            trigger_price: t_price,
+            price_when_set: c_price
+        });
+
+        newAlert.save();
+        return newAlert;
+
+    
     }
 
     /**
