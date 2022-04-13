@@ -19,7 +19,7 @@ app.listen(port, async () => {
     //connect DB
     await connectDB();
 
-    console.log(colors.green(`Web server running on PORT ${port}`));
+    console.log(colors.yellow(`Web server running on PORT ${port}`));
 
     const tweetStream = await T.stream("statuses/filter", {track: "@Crypto3OT", lang: 'en'});
     
@@ -28,7 +28,7 @@ app.listen(port, async () => {
         const isRetweeted: boolean = tweet.retweeted_status != null;
         if (isRetweeted) {
             return;
-        }
+        } 
         const tweetID: string = tweet.id_str;
         const userID: string = tweet.user.id_str;
         const accountName: string = tweet.user.name;
@@ -47,7 +47,7 @@ app.listen(port, async () => {
 
 
         const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText);
-        
+
         // catch invalid commands
         if( commandType.length != 1 ) {
             
