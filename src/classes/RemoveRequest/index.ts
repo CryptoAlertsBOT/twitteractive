@@ -75,11 +75,15 @@ export class RemoveRequest extends IncomingRequest {
             await User.findOneAndUpdate({_id: user._id}, {$pull: {subscriptions: subscription._id}}, {upsert: true}).exec();
             await Symbol.findOneAndUpdate({_id: symbol._id}, {$pull: {subs: subscription._id}}, {upsert: true}).exec();
 
-            // like tweet
-            this.likeTweet();
+            await Subscription.findByIdAndDelete(subscription._id, null, (err: mongoose.CallbackError, doc) => {
 
-            // Send acknowledgement
-            this.sendRemoveAck()
+                // like tweet
+                this.likeTweet();
+
+                // Send acknowledgement
+                this.sendRemoveAck()
+            });
+
 
             return true;
 
