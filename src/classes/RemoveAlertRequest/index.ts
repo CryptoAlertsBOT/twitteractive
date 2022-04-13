@@ -12,7 +12,7 @@ import { IncomingRequest } from "../IncomingRequest";
  * @params SYMBOL symbol to add to user subscription.
  */
 
-export class SetAlertRequest extends IncomingRequest {
+export class RemoveAlertRequest extends IncomingRequest {
 
     // public commandType: CommandType = CommandType.ADD;
     private hashtags: Array<string>;
@@ -23,17 +23,18 @@ export class SetAlertRequest extends IncomingRequest {
     constructor(tweetID: string, userID: string, accountName: string, screenName: string, text: string, hashtags: Array<Object>, reTweeted: boolean) {
 
         // Instantiate super class [IncomingRequest]
-        super(tweetID, userID, accountName, screenName, text, reTweeted, CommandType.SETALERT);
+        super(tweetID, userID, accountName, screenName, text, reTweeted, CommandType.REMOVEALERT);
 
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
         // set symbol to the first recorded hashtag.
         this.symbol = this.hashtags[0];
 
-        this.trigger_price = SetAlertRequest.extractPrice(text);
+        this.trigger_price = RemoveAlertRequest.extractPrice(text);
 
         // log to console
-        this.log(CommandType.SETALERT);
+        this.log(CommandType.REMOVEALERT);
+
     }
 
     public static extractPrice(text: string): number | null{
@@ -66,7 +67,7 @@ export class SetAlertRequest extends IncomingRequest {
      * @returns Promise<boolean>
      */
 
-    public async addAlert(): Promise<boolean> {
+    public async removeAlert(): Promise<boolean> {
         // check if trigger price is valid
         if(!this.trigger_price) {
             IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.INVALID_TRIGGER_PRICE);
@@ -110,20 +111,25 @@ export class SetAlertRequest extends IncomingRequest {
                     // Notify user of the error.
                     // return false.
                     if(!alert) {
-                        sendMessageToUser(this.userID, `${this.symbol} already has a price alert set at ${this.trigger_price}!`);
+                        sendMessageToUser(this.userID, `You dont have any price alert for ${this.symbol} at ${this.trigger_price}!`);
                         return false;
                     }
 
-                    // if alert is not null, a new alert has been added to the customalert database.
-                    // update the user model to include this alert in the alerts list.
+                    // if alert is not null, a alert exists in database
+                    // update the user model to remove this alert in the alerts list.
                     // update alerts list in User model
-                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {alerts: alert._id}}, {upsert: true}).exec();
+                    await User.findOneAndUpdate({_id: user._id}, {$pull: {alerts: alert._id}}, {upsert: true}).exec();
 
-                    // like tweet
-                    this.likeTweet();
+                    // delete the alert from db
+                    CustomAlert.findByIdAndDelete(alert._id, null, (err: mongoose.CallbackError, doc) => {
+                        if(!err) {
+                        // like tweet
+                        this.likeTweet();
 
-                    // Send acknowledgement
-                    this.sendAddAlertAck()
+                        // Send acknowledgement
+                        this.sendRemoveAlertAck()
+                        }
+                    });
 
                     return true;
         
@@ -152,21 +158,12 @@ export class SetAlertRequest extends IncomingRequest {
             trigger_price: t_price
         }).exec();
         
-        // If alert already exists, we want to send back null.
-        // This is so that we can notify the user that the alert is already set for that symbol at that price.
+        // If alert already exists, we want to send back the alert.
         if (currentAlert) {
-            return null;
+            return currentAlert;
         }
-
-        const newAlert: AlertDocument = new CustomAlert({ 
-            symbol: symbol_id, 
-            user: user_id,
-            trigger_price: t_price,
-            price_when_set: c_price
-        });
-
-        newAlert.save();
-        return newAlert;
+        // else null
+        return null;
 
     
     }
@@ -176,8 +173,8 @@ export class SetAlertRequest extends IncomingRequest {
      * @returns void
      */
     
-    private sendAddAlertAck(): void {
-        const text: string = `You will be notified when ${this.symbol} hits ${this.trigger_price}, ${this.username}. \n\n Tag us and say "removealert #${this.symbol} -p ${this.trigger_price}" to remove this custom alert.`
+    private sendRemoveAlertAck(): void {
+        const text: string = `Removed alert for ${this.symbol} at ${this.trigger_price}. \n\n Tag us and say "setalert #<SYMBOL> -p <PRICE>" to add another custom price alert.`
         sendMessageToUser(this.userID, text);
     }
 }
