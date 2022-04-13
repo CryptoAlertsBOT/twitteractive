@@ -159,9 +159,11 @@ export class IncomingRequest {
 
             case InvalidRequestType.INVALID_TRIGGER_PRICE:
                 customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, INVALID_TRIGGER_PRICE_TEXT);
+                break;
 
             case InvalidRequestType.SUBSCRIPTION_ERROR:
                 customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, SUBSCRIPTION_ERROR_TEXT);
+                break;
 
             case InvalidRequestType.UNKNOWN:
                 sendMessageToUser(userID, UNKNOWN_ERROR);

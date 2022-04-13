@@ -26,7 +26,7 @@ export class AddRequest extends IncomingRequest {
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0];
+        this.symbol = this.hashtags[0].toUpperCase();
 
         // log to console
         this.log(CommandType.ADD);
@@ -75,7 +75,7 @@ export class AddRequest extends IncomingRequest {
 
                     // if subs is present, notify.
                     if (!subscription) {
-                        IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a Subscription set for ${this.symbol}`);
+                        IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a subscription set for #${this.symbol}`);
                         return false;
                     }
 

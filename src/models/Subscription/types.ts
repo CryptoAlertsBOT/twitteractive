@@ -5,5 +5,5 @@ import { IUserSchema } from "../User/types";
 
 export interface ISubscriptionSchema extends mongoose.Document {
     symbol: ISymbolSchema['_id'],
-    user: IUserSchema['_id']
+    user: IUserSchema['_id'],
 }

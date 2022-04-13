@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { sendMessageToUser } from "../../controllers";
+import { PurgedSub } from "../../models/PurgedSub";
 import { Subscription } from "../../models/Subscription";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { CommandType, InvalidRequestType, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
+import { CommandType, InvalidRequestType, PurgedSubscriptionDocument, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -26,7 +27,7 @@ export class RemoveRequest extends IncomingRequest {
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0];
+        this.symbol = this.hashtags[0].toUpperCase();
 
         // log to console
         this.log(CommandType.REMOVE);
@@ -67,7 +68,7 @@ export class RemoveRequest extends IncomingRequest {
 
            // No subscription exists, then
            if (!subscription) {
-               IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You don't have a subscription set for ${this.symbol}`);
+               IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You don't have a subscription set for #${this.symbol}`);
                return false;
            }
 
@@ -75,8 +76,19 @@ export class RemoveRequest extends IncomingRequest {
             await User.findOneAndUpdate({_id: user._id}, {$pull: {subscriptions: subscription._id}}, {upsert: true}).exec();
             await Symbol.findOneAndUpdate({_id: symbol._id}, {$pull: {subs: subscription._id}}, {upsert: true}).exec();
 
-            await Subscription.findByIdAndDelete(subscription._id, null, (err: mongoose.CallbackError, doc) => {
+            // push subscription data to PurgedSub model.
+            let purgedSubData: PurgedSubscriptionDocument = new PurgedSub({
+                symbol: this.symbol,
+                userID: this.userID,
+                username: this.username,
+                createdAt: subscription.get("createdAt")
+            });
 
+            // save purged subscription to DB
+            await purgedSubData.save();
+
+            Subscription.findByIdAndDelete(subscription._id, null, async (err: mongoose.CallbackError, doc) => {
+                
                 // like tweet
                 this.likeTweet();
 
@@ -90,6 +102,7 @@ export class RemoveRequest extends IncomingRequest {
         } catch (e: unknown) {
             
             IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.UNKNOWN);
+            console.log(e);
             return false;
         }
         
