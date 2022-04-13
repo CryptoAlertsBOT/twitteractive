@@ -5,7 +5,7 @@ import { sendMessageToUser } from "../../controllers";
 import { CustomAlert } from "../../models/CustomAlert";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { INVALID_COMMAND_TEXT, INVALID_SYMBOL_TEXT, INVALID_TRIGGER_PRICE_TEXT, MULTIPLE_COMMANDS_TEXT, UNKNOWN_ERROR } from "../../types/constants";
+import { INVALID_COMMAND_TEXT, INVALID_SYMBOL_TEXT, INVALID_TRIGGER_PRICE_TEXT, MULTIPLE_COMMANDS_TEXT, SUBSCRIPTION_ERROR_TEXT, UNKNOWN_ERROR } from "../../types/constants";
 import { AlertDocument, CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
 
 export class IncomingRequest {
@@ -159,6 +159,9 @@ export class IncomingRequest {
 
             case InvalidRequestType.INVALID_TRIGGER_PRICE:
                 customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, INVALID_TRIGGER_PRICE_TEXT);
+
+            case InvalidRequestType.SUBSCRIPTION_ERROR:
+                customText ? sendMessageToUser(userID, customText) : sendMessageToUser(userID, SUBSCRIPTION_ERROR_TEXT);
 
             case InvalidRequestType.UNKNOWN:
                 sendMessageToUser(userID, UNKNOWN_ERROR);

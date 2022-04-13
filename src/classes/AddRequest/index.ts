@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import { getBinanceData, sendMessageToUser } from "../../controllers";
+import { Subscription } from "../../models/Subscription";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { CommandType, InvalidRequestType, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -69,20 +70,18 @@ export class AddRequest extends IncomingRequest {
                 let symbol: SymbolDocument = await IncomingRequest.validateSymbolAndCreate(this.symbol);
                 
                 try {
-                    
-                   // check if already present
-                    const isInArray = user.get('subscriptions').some((sub: mongoose.Types.ObjectId) => {
-                        return sub.equals(symbol.get("_id"));
-                    });
+                    // Create a subscription document and save.
+                    let subscription: SubscriptionDocument | null = await this._validateAddSub(symbol.get('_id'), user.get('_id'));
 
-                    if (isInArray) {
-                        sendMessageToUser(this.userID, `${this.symbol} is already added to your subscriptions!`);
+                    // if subs is present, notify.
+                    if (!subscription) {
+                        IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a Subscription set for ${this.symbol}`);
                         return false;
                     }
 
-                    // update symbol list 
-                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: symbol._id}}, {upsert: true}).exec();
-                    await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {users: user._id}}, {upsert: true}).exec();
+                    // add subscription _id to user and symbol 
+                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: subscription._id}}, {upsert: true}).exec();
+                    await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {subs: subscription._id}}, {upsert: true}).exec();
 
                     // like tweet
                     this.likeTweet();
@@ -100,6 +99,28 @@ export class AddRequest extends IncomingRequest {
             })
         return false
         
+    }
+
+    /**
+     * Function which validates the add subscription request.
+     */
+
+    private async _validateAddSub(symbol_id: mongoose.Types.ObjectId, user_id: mongoose.Types.ObjectId): Promise<SubscriptionDocument | null> {
+        
+        let sub: SubscriptionDocument | null = await Subscription.findOne({symbol: symbol_id, user: user_id}).exec();
+
+        if (sub) {
+            return null;
+        }
+
+        // if not exists, create a subscription document
+        let newSub: SubscriptionDocument = new Subscription({
+            symbol: symbol_id,
+            user: user_id
+        });
+
+        await newSub.save();
+        return newSub;
     }
 
     /**

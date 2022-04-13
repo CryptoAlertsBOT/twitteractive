@@ -10,9 +10,9 @@ const SymbolSchema: Schema<ISymbolSchema> = new Schema({
         minlength: [4, "Symbols must be atleast 4 charecters long!"],
         uppercase: true,
     },
-    users: [{
+    subs: [{
         type: Types.ObjectId,
-        ref: "User"
+        ref: "Subscription"
     }]
 }, {timestamps: {currentTime: () => new Date()}})
 

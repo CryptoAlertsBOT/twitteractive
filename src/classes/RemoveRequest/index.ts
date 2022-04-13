@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import { sendMessageToUser } from "../../controllers";
+import { Subscription } from "../../models/Subscription";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { CommandType, InvalidRequestType, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -62,18 +63,17 @@ export class RemoveRequest extends IncomingRequest {
         try {
             // Check if user has symbol subscription.
             // check if already present
-            const isInArray = user.get('subscriptions').some((sub: mongoose.Types.ObjectId) => {
-                return sub.equals(symbol!.get("_id"));
-            });
+           let subscription: SubscriptionDocument | null = await this._validateRemoveSub(symbol.get('_id'), user.get('_id'));
 
-            if (!isInArray) {
-                sendMessageToUser(this.userID, `You aren't subscribed to #${this.symbol}!`);
-                return false;
-            }
+           // No subscription exists, then
+           if (!subscription) {
+               IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You don't have a subscription set for ${this.symbol}`);
+               return false;
+           }
 
             // update symbol list 
-            await User.findOneAndUpdate({_id: user._id}, {$pull: {subscriptions: symbol._id}}, {upsert: true}).exec();
-            await Symbol.findOneAndUpdate({_id: symbol._id}, {$pull: {users: user._id}}, {upsert: true}).exec();
+            await User.findOneAndUpdate({_id: user._id}, {$pull: {subscriptions: subscription._id}}, {upsert: true}).exec();
+            await Symbol.findOneAndUpdate({_id: symbol._id}, {$pull: {subs: subscription._id}}, {upsert: true}).exec();
 
             // like tweet
             this.likeTweet();
@@ -89,6 +89,22 @@ export class RemoveRequest extends IncomingRequest {
             return false;
         }
         
+    }
+
+
+    /**
+     * Function to validate remove subscription request
+     * @description checks to see if sub is present.
+     */
+
+    private async _validateRemoveSub(symbol_id: mongoose.Types.ObjectId, user_id: mongoose.Types.ObjectId): Promise<SubscriptionDocument | null> {
+
+        const sub: SubscriptionDocument | null = await Subscription.findOne({symbol: symbol_id, user: user_id}).exec();
+        if (!sub) {
+            return null;
+        }
+
+        return sub;
     }
 
     /**
