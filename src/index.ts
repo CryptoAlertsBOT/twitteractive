@@ -9,6 +9,7 @@ import { AddRequest } from "./classes/AddRequest";
 import { SetAlertRequest } from "./classes/SetAlertRequest";
 import { CommandType, InvalidRequestType } from "./types/twitter";
 import { RemoveRequest } from "./classes/RemoveRequest";
+import { RemoveAlertRequest } from "./classes/RemoveAlertRequest";
 
 const port = env.SERVER_PORT!;
 
@@ -46,7 +47,7 @@ app.listen(port, async () => {
 
 
         const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText);
-        console.log(commandType)
+        
         // catch invalid commands
         if( commandType.length != 1 ) {
             
@@ -99,6 +100,18 @@ app.listen(port, async () => {
             setAlert.addAlert();
         } else if (commandType[0] == CommandType.REMOVEALERT){
             // Remove Alert
+            let removeAlertRequest:  RemoveAlertRequest = new RemoveAlertRequest(
+                tweetID,
+                userID,
+                accountName,
+                userScreenName,
+                tweetText,
+                symbolHashEntity,
+                isRetweeted
+            );
+
+            // process request
+            removeAlertRequest.removeAlert();
         }
 
      });

@@ -1,3 +1,4 @@
+import { bgGreen, bgMagenta, bgRed, bgWhite, bgYellow } from "colors";
 import mongoose from "mongoose";
 import T from "../../bot";
 import { sendMessageToUser } from "../../controllers";
@@ -24,9 +25,6 @@ export class IncomingRequest {
         this.text = text;
         this.reTweeted = reTweeted;
         this.commandType = type == null ? CommandType.UNSET : type;
-
-        // log
-        this.log()
     }
 
     public static extractSymbols(hashtags: Array<Object>): Array<string> {
@@ -172,12 +170,21 @@ export class IncomingRequest {
 
     }
 
-    public log(): void {
-        console.group(`TWEET ID: `.bgGreen, this.tweetID);
-                console.log('USER ID: '.bgMagenta, this.userID);
-                console.log('Screen Name: '.bgMagenta, this.screenName);
-                console.log('TEXT: '.bgMagenta, this.text);
-                console.log('COMMAND TYPE: '.bgMagenta, this.commandType);
+    public log(type: CommandType): void {
+        let color = type == CommandType.ADD ? bgGreen :
+                                CommandType.REMOVE ? bgRed : bgWhite;
+
+        if (type == CommandType.SETALERT) {
+            color = bgMagenta;
+        } else if (type == CommandType.REMOVEALERT) {
+            color = bgYellow;
+        }
+
+        console.group(color(`TWEET ID: `), this.tweetID);
+                console.log(color('USER ID: '), this.userID);
+                console.log(color('Screen Name: '), this.screenName);
+                console.log(color('TEXT: '), this.text);
+                console.log(color('COMMAND TYPE: '), this.commandType);
         console.groupEnd();
     }
 

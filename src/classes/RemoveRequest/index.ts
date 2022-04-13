@@ -27,6 +27,9 @@ export class RemoveRequest extends IncomingRequest {
         // set symbol to the first recorded hashtag.
         this.symbol = this.hashtags[0];
 
+        // log to console
+        this.log(CommandType.REMOVE);
+
     }
 
 
