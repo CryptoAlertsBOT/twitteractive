@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { sendMessageToUser } from "../../controllers";
+import { PurgedSub } from "../../models/PurgedSub";
+import { Subscription } from "../../models/Subscription";
 import { Symbol } from "../../models/Symbol";
 import { User } from "../../models/User";
-import { CommandType, InvalidRequestType, SymbolDocument, UserDocument } from "../../types/twitter";
+import { CommandType, InvalidRequestType, PurgedSubscriptionDocument, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -25,7 +27,7 @@ export class RemoveRequest extends IncomingRequest {
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0];
+        this.symbol = this.hashtags[0].toUpperCase();
 
         // log to console
         this.log(CommandType.REMOVE);
@@ -62,33 +64,64 @@ export class RemoveRequest extends IncomingRequest {
         try {
             // Check if user has symbol subscription.
             // check if already present
-            const isInArray = user.get('subscriptions').some((sub: mongoose.Types.ObjectId) => {
-                return sub.equals(symbol!.get("_id"));
-            });
+           let subscription: SubscriptionDocument | null = await this._validateRemoveSub(symbol.get('_id'), user.get('_id'));
 
-            if (!isInArray) {
-                sendMessageToUser(this.userID, `You aren't subscribed to #${this.symbol}!`);
-                return false;
-            }
+           // No subscription exists, then
+           if (!subscription) {
+               IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You don't have a subscription set for #${this.symbol}`);
+               return false;
+           }
 
             // update symbol list 
-            await User.findOneAndUpdate({_id: user._id}, {$pull: {subscriptions: symbol._id}}, {upsert: true}).exec();
-            await Symbol.findOneAndUpdate({_id: symbol._id}, {$pull: {users: user._id}}, {upsert: true}).exec();
+            await User.findOneAndUpdate({_id: user._id}, {$pull: {subscriptions: subscription._id}}, {upsert: true}).exec();
+            await Symbol.findOneAndUpdate({_id: symbol._id}, {$pull: {subs: subscription._id}}, {upsert: true}).exec();
 
-            // like tweet
-            this.likeTweet();
+            // push subscription data to PurgedSub model.
+            let purgedSubData: PurgedSubscriptionDocument = new PurgedSub({
+                symbol: this.symbol,
+                userID: this.userID,
+                username: this.username,
+                createdAt: subscription.get("createdAt")
+            });
 
-            // Send acknowledgement
-            this.sendRemoveAck()
+            // save purged subscription to DB
+            await purgedSubData.save();
+
+            Subscription.findByIdAndDelete(subscription._id, null, async (err: mongoose.CallbackError, doc) => {
+                
+                // like tweet
+                this.likeTweet();
+
+                // Send acknowledgement
+                this.sendRemoveAck()
+            });
+
 
             return true;
 
         } catch (e: unknown) {
             
             IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.UNKNOWN);
+            console.log(e);
             return false;
         }
         
+    }
+
+
+    /**
+     * Function to validate remove subscription request
+     * @description checks to see if sub is present.
+     */
+
+    private async _validateRemoveSub(symbol_id: mongoose.Types.ObjectId, user_id: mongoose.Types.ObjectId): Promise<SubscriptionDocument | null> {
+
+        const sub: SubscriptionDocument | null = await Subscription.findOne({symbol: symbol_id, user: user_id}).exec();
+        if (!sub) {
+            return null;
+        }
+
+        return sub;
     }
 
     /**

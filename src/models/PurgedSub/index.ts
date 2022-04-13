@@ -15,6 +15,10 @@ const PurgedSubSchema: Schema<IPurgedSubSchema> = new Schema({
         type: String,
         required: true
     },
+    createdAt: {
+        type: Date,
+        required: true
+    },
     deletedOn: {
         type: Date,
         requried: true,
@@ -27,10 +31,10 @@ const PurgedSubSchema: Schema<IPurgedSubSchema> = new Schema({
  * Middleware to run post deletion
  */
 PurgedSubSchema.pre('validate', function (next) {
-    
+
     // set `deletedOn`
-    this.update({}, {$set: {deletedOn: new Date()}});
-    return next();
+    this.set('deletedOn', new Date());
+    next();
 });
 
 

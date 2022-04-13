@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { IUserSchema } from "../User/types";
+import { ISubscriptionSchema } from "../Subscription/types";
 
 export interface ISymbolSchema extends mongoose.Document {
     symbol: string,
-    users: IUserSchema['_id'][]
+    subs: ISubscriptionSchema['_id'][]
 }

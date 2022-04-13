@@ -4,6 +4,7 @@ export interface IPurgedSubSchema extends mongoose.Document {
     symbol: string,
     userID: string,
     username: string,
+    createdAt: Date,
     deletedOn?: Date
 }
 

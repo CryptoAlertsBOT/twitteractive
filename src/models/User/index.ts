@@ -21,7 +21,7 @@ const userSchema: Schema<IUserSchema> = new Schema({
 
     subscriptions: [{
         type: Types.ObjectId,
-        ref: "Symbol"
+        ref: "Subscription"
     }],
 
     alerts: [{
