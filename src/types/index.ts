@@ -15,7 +15,7 @@ export type APISymbolResponse = {
     msg: string
 }
 
-export interface INotificationData {
+export interface IThresholdData {
     readonly userID: string,
     readonly last_price: number,
     readonly symbol: string,

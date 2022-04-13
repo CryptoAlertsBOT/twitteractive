@@ -2,7 +2,7 @@ import {Request, Response, Router} from "express";
 import "dotenv/config";
 import {env} from 'process';
 import colors from "colors";
-import { INotificationData, IPricePayload } from "../../types";
+import { IThresholdData, IPricePayload } from "../../types";
 import { Symbol } from "../../models/Symbol";
 import { SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { Subscription } from "../../models/Subscription";
@@ -69,7 +69,7 @@ router.post('/thresholdPayload', async (req: Request, res: Response): Promise<vo
         let symbolDoc: SymbolDocument = sub.get('symbol');
 
         // fire off an event to notify user about symbol.
-        let data: INotificationData = {
+        let data: IThresholdData = {
             userID: userDoc.get("twitterID"),
             last_price,
             symbol: symbolToNotify,
