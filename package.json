@@ -4,7 +4,9 @@
   "description": "An interative version of CryptoBOT for Twitter.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install": "npm install",
+    "build": "tsc",
+    "start": "npm run install && npm run build"
   },
   "keywords": [
     "cryptobot",
