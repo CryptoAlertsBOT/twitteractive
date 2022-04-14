@@ -98,7 +98,7 @@ router.post('/alertPayload', async (req: Request, res: Response) => {
  */
 
 router.post('/thresholdPayload', async (req: Request, res: Response): Promise<void> => {
-    
+
     const payload: IThresholdPayload = req.body;
     const symbolToNotify: string = payload.symbol;
     const last_price: number = payload.last_price;

@@ -1,10 +1,17 @@
 version: '3'
 services:
   cryptobot-main:
-    image: kautilyak/cryptobot:v2
+    image: kautilyak/cryptobot:2.1
     ports:
       - 3001:3001
+    networks:
+      - isolation-net
   cb-twitter:
     image: kautilyak/cb-twitter:1.0
     ports:
-      - 5000:5001
+      - 5001:5001
+    networks:
+      - isolation-net
+networks:
+  isolation-net:
+    driver: bridge
