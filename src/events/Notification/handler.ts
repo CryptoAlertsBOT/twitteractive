@@ -40,10 +40,11 @@ notification.on(PriceNotification.SUBSCIPTION_ALERT, (data: IThresholdData) => {
 notification.on(PriceNotification.CUSTOM_ALERT, async (data: ICustomAlertData): Promise<void> => {
     let message = ``;
     const {twitterID, username, trigger_price, price_when_set, last_price, symbol, alert_id} = data;
+    const base: Base | boolean = endsWithBase(data.symbol);
 
     // set direction
     let hasToGo: Change = trigger_price > price_when_set ? Change.UP : Change.DOWN;
-    message = `${symbol} has reached your price target (${trigger_price}).\nCurrent price - ${last_price}\nChange - ${calcChange(price_when_set, last_price)}`;
+    message = `#${symbol} has reached your price target (${trigger_price} ${getBaseAbbrevation(base as Base)}).\nCurrent price - ${last_price.toFixed(2)} ${getBaseAbbrevation(base as Base)}\nChange - ${calcChange(price_when_set, last_price)}%`;
     sendMessageToUser(twitterID, message);
 
     // Purge alert

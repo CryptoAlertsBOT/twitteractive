@@ -129,7 +129,7 @@ export class RemoveAlertRequest extends IncomingRequest {
                     // Notify user of the error.
                     // return false.
                     if(!alert) {
-                        sendMessageToUser(this.userID, `You dont have any price alert for ${this.symbol} at ${this.trigger_price}!`);
+                        sendMessageToUser(this.userID, `You dont have any price alert for #${this.symbol} at ${this.trigger_price}!`);
                         return false;
                     }
 
@@ -192,7 +192,7 @@ export class RemoveAlertRequest extends IncomingRequest {
      */
     
     private sendRemoveAlertAck(): void {
-        const text: string = `Removed alert for ${this.symbol} at ${this.trigger_price}. \n\n Tag us and say "setalert #<SYMBOL> -p <PRICE>" to add another custom price alert.`
+        const text: string = `Removed alert for #${this.symbol} at ${this.trigger_price}. \n\n Tag us and say "setalert #<SYMBOL> -p <PRICE>" to add another custom price alert.`
         sendMessageToUser(this.userID, text);
     }
 }

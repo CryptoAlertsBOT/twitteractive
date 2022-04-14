@@ -71,26 +71,25 @@ export class AddRequest extends IncomingRequest {
                 
                 try {
                     // Create a subscription document and save.
-                    this._validateAddSub(symbol.get('_id'), user.get('_id'))
-                        .then(async (subscription: SubscriptionDocument | null) => {
-                             // if subs is present, notify.
-                            if (!subscription) {
-                                IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a subscription set for #${this.symbol}`);
-                                return false;
-                            }
-                            console.log(subscription._id, subscription.get('_id'));
-                            // add subscription _id to user and symbol 
-                            await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: subscription.get('_id')}}, {upsert: true}).exec();
-                            await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {subs: subscription._id}}, {upsert: true}).exec();
+                    let subscription: SubscriptionDocument | null = await this._validateAddSub(symbol.get('_id'), user.get('_id'));
 
-                            // like tweet
-                            this.likeTweet();
+                    // if subs is present, notify.
+                    if (!subscription) {
+                        IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a subscription set for #${this.symbol}`);
+                        return false;
+                    }
 
-                            // Send acknowledgement
-                            this.sendAddAck()
+                    // add subscription _id to user and symbol 
+                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: subscription._id}}, {upsert: true}).exec();
+                    await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {subs: subscription._id}}, {upsert: true}).exec();
 
-                            return true;
-                        })
+                    // like tweet
+                    this.likeTweet();
+
+                    // Send acknowledgement
+                    this.sendAddAck()
+
+                    return true;
         
                 } catch (e: unknown) {
                     
@@ -130,7 +129,7 @@ export class AddRequest extends IncomingRequest {
      */
     
     private sendAddAck(): void {
-        const text: string = `Subscription added for ${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
+        const text: string = `Subscription added for #${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
         sendMessageToUser(this.userID, text);
     }
 }

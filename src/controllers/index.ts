@@ -214,6 +214,7 @@ const addZero = (value: number): string => {
  * @param end (Number)
  * @returns Number
  */
-export const calcChange = (start: number, end: number): number => {
-    return (end-start)/100;
+export const calcChange = (start: number, end: number): string => {
+    let change = (end-start)/100;
+    return change.toFixed(2);
 }

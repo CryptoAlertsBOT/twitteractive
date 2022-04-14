@@ -35,7 +35,7 @@ export const router: Router = Router();
 
 router.post('/alertPayload', async (req: Request, res: Response) => {
     const payload: IPricePayload = req.body;
-    console.log(payload)
+    
     // Check if symbol is present in DB. If not, add.
     // 
     // Query payload with database.
@@ -60,6 +60,7 @@ router.post('/alertPayload', async (req: Request, res: Response) => {
         .populate('user')
         .exec();
 
+    
     // If no alerts matched, then return.
     if (!alertsMatched) return;
 
@@ -86,6 +87,7 @@ router.post('/alertPayload', async (req: Request, res: Response) => {
         notification.emit(PriceNotification.CUSTOM_ALERT, data);
     });
 
+    res.status(200);
     });
 
 
@@ -96,8 +98,7 @@ router.post('/alertPayload', async (req: Request, res: Response) => {
  */
 
 router.post('/thresholdPayload', async (req: Request, res: Response): Promise<void> => {
-    console.log(req.body);
-
+    
     const payload: IThresholdPayload = req.body;
     const symbolToNotify: string = payload.symbol;
     const last_price: number = payload.last_price;
