@@ -1,0 +1,10 @@
+version: '3'
+services:
+  cryptobot-main:
+    image: kautilyak/cryptobot:v2
+    ports:
+      - 3001:3001
+  cb-twitter:
+    image: kautilyak/cb-twitter:1.0
+    ports:
+      - 5000:5001

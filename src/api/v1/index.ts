@@ -2,7 +2,7 @@ import {Request, Response, Router} from "express";
 import "dotenv/config";
 import {env} from 'process';
 import colors from "colors";
-import { IThresholdData, IPricePayload, ICustomAlertData } from "../../types";
+import { IThresholdData, IPricePayload, ICustomAlertData, IThresholdPayload } from "../../types";
 import { Symbol } from "../../models/Symbol";
 import { AlertDocument, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { Subscription } from "../../models/Subscription";
@@ -35,7 +35,7 @@ export const router: Router = Router();
 
 router.post('/alertPayload', async (req: Request, res: Response) => {
     const payload: IPricePayload = req.body;
-
+    console.log(payload)
     // Check if symbol is present in DB. If not, add.
     // 
     // Query payload with database.
@@ -97,11 +97,12 @@ router.post('/alertPayload', async (req: Request, res: Response) => {
 
 router.post('/thresholdPayload', async (req: Request, res: Response): Promise<void> => {
     console.log(req.body);
-    
-    const symbolToNotify: string = req.body.symbol;
-    const last_price: number = req.body.last_price;
-    const change: number = req.body.change;
-    const triggerTime : number = req.body.triggerTime;
+
+    const payload: IThresholdPayload = req.body;
+    const symbolToNotify: string = payload.symbol;
+    const last_price: number = payload.last_price;
+    const change: number = payload.change;
+    const triggerTime : number = payload.triggerTime;
 
     // Query for symbol in DB.
     let symbolDoc: SymbolDocument | null = await Symbol.findOne({symbol: symbolToNotify}).exec();

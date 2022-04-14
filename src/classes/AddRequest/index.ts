@@ -71,25 +71,26 @@ export class AddRequest extends IncomingRequest {
                 
                 try {
                     // Create a subscription document and save.
-                    let subscription: SubscriptionDocument | null = await this._validateAddSub(symbol.get('_id'), user.get('_id'));
+                    this._validateAddSub(symbol.get('_id'), user.get('_id'))
+                        .then(async (subscription: SubscriptionDocument | null) => {
+                             // if subs is present, notify.
+                            if (!subscription) {
+                                IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a subscription set for #${this.symbol}`);
+                                return false;
+                            }
+                            console.log(subscription._id, subscription.get('_id'));
+                            // add subscription _id to user and symbol 
+                            await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: subscription.get('_id')}}, {upsert: true}).exec();
+                            await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {subs: subscription._id}}, {upsert: true}).exec();
 
-                    // if subs is present, notify.
-                    if (!subscription) {
-                        IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.SUBSCRIPTION_ERROR, `You already have a subscription set for #${this.symbol}`);
-                        return false;
-                    }
+                            // like tweet
+                            this.likeTweet();
 
-                    // add subscription _id to user and symbol 
-                    await User.findOneAndUpdate({_id: user._id}, {$addToSet: {subscriptions: subscription._id}}, {upsert: true}).exec();
-                    await Symbol.findOneAndUpdate({_id: symbol._id}, {$addToSet: {subs: subscription._id}}, {upsert: true}).exec();
+                            // Send acknowledgement
+                            this.sendAddAck()
 
-                    // like tweet
-                    this.likeTweet();
-
-                    // Send acknowledgement
-                    this.sendAddAck()
-
-                    return true;
+                            return true;
+                        })
         
                 } catch (e: unknown) {
                     

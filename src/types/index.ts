@@ -6,6 +6,13 @@ export interface IPricePayload {
     price: number
 }
 
+export interface IThresholdPayload {
+    symbol: string,
+    last_price: number,
+    change: number,
+    triggerTime: number
+}
+
 export interface IConfig {
     readonly [key: string]: string
 }
