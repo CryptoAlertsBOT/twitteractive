@@ -130,7 +130,7 @@ export class RemoveRequest extends IncomingRequest {
      */
     
     private sendRemoveAck(): void {
-        const text: string = `Subscription removed for ${this.symbol}, ${this.username}.\n\n Tag us and say "add #${this.symbol}" to add this subscription again.`
+        const text: string = `Subscription removed for #${this.symbol}, ${this.username}.\n\n Tag us and say "add #${this.symbol}" to add this subscription again.`
         sendMessageToUser(this.userID, text);
     }
 }

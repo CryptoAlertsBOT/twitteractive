@@ -110,7 +110,7 @@ export class SetAlertRequest extends IncomingRequest {
                     // Notify user of the error.
                     // return false.
                     if(!alert) {
-                        sendMessageToUser(this.userID, `${this.symbol} already has a price alert set at ${this.trigger_price}!`);
+                        sendMessageToUser(this.userID, `#${this.symbol} already has a price alert set at ${this.trigger_price}!`);
                         return false;
                     }
 
@@ -177,7 +177,7 @@ export class SetAlertRequest extends IncomingRequest {
      */
     
     private sendAddAlertAck(): void {
-        const text: string = `You will be notified when ${this.symbol} hits ${this.trigger_price}, ${this.username}. \n\n Tag us and say "removealert #${this.symbol} -p ${this.trigger_price}" to remove this custom alert.`
+        const text: string = `You will be notified when #${this.symbol} hits ${this.trigger_price}, ${this.username}. \n\n Tag us and say "removealert #${this.symbol} -p ${this.trigger_price}" to remove this custom alert.`
         sendMessageToUser(this.userID, text);
     }
 }

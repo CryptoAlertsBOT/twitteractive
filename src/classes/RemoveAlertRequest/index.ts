@@ -55,6 +55,24 @@ export class RemoveAlertRequest extends IncomingRequest {
         return null;
     }
 
+    /**
+     * @static 
+     * @description Removes alert from CustomAlert DB.
+     * @param alert_id {mongoose.Types.ObjectID}
+     */
+    public static async purgeAlert(alert_id: mongoose.Types.ObjectId): Promise<void> {
+        // Push to Purged Alert.
+        
+        // delete Custom Alert
+        try {
+            await CustomAlert.findByIdAndDelete(alert_id).exec();
+        } catch (err) {
+            console.log(err);
+            //push to error log database.
+        }
+        
+    }
+
 
     /**
      * @description Function to add the subscription request to the database.
@@ -111,7 +129,7 @@ export class RemoveAlertRequest extends IncomingRequest {
                     // Notify user of the error.
                     // return false.
                     if(!alert) {
-                        sendMessageToUser(this.userID, `You dont have any price alert for ${this.symbol} at ${this.trigger_price}!`);
+                        sendMessageToUser(this.userID, `You dont have any price alert for #${this.symbol} at ${this.trigger_price}!`);
                         return false;
                     }
 
@@ -174,7 +192,7 @@ export class RemoveAlertRequest extends IncomingRequest {
      */
     
     private sendRemoveAlertAck(): void {
-        const text: string = `Removed alert for ${this.symbol} at ${this.trigger_price}. \n\n Tag us and say "setalert #<SYMBOL> -p <PRICE>" to add another custom price alert.`
+        const text: string = `Removed alert for #${this.symbol} at ${this.trigger_price}. \n\n Tag us and say "setalert #<SYMBOL> -p <PRICE>" to add another custom price alert.`
         sendMessageToUser(this.userID, text);
     }
 }

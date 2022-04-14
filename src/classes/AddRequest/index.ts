@@ -129,7 +129,7 @@ export class AddRequest extends IncomingRequest {
      */
     
     private sendAddAck(): void {
-        const text: string = `Subscription added for ${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
+        const text: string = `Subscription added for #${this.symbol}, ${this.username}. You will be notified when it moves 3.5%.\n\n Tag us and say "remove #${this.symbol}" to remove this subscription.`
         sendMessageToUser(this.userID, text);
     }
 }

@@ -11,7 +11,6 @@ const userSchema: Schema<IUserSchema> = new Schema({
     username: {
         type: String,
         required: [true, "Username cannot be empty!"],
-        unique: true,
     },
     screen_name: {
         type: String,

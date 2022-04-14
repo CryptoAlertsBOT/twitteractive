@@ -24,7 +24,7 @@ app.listen(port, async () => {
     const tweetStream = await T.stream("statuses/filter", {track: "@Crypto3OT", lang: 'en'});
     
     tweetStream.on('tweet', async (tweet) => {
-        
+     
         const isRetweeted: boolean = tweet.retweeted_status != null;
         if (isRetweeted) {
             return;
