@@ -1,3 +1,6 @@
+import mongoose from "mongoose"
+import { ICustomAlertSchema } from "../models/CustomAlert/types"
+
 export interface IPricePayload {
     symbol: string,
     price: number
@@ -23,7 +26,22 @@ export interface IThresholdData {
     readonly triggerTime: number
 }
 
+export interface ICustomAlertData {
+    readonly alert_id: ICustomAlertSchema['_id'],
+    readonly twitterID: string,
+    readonly username: string,
+    readonly symbol: string,
+    readonly trigger_price: ICustomAlertSchema['trigger_price'],
+    readonly price_when_set: ICustomAlertSchema['price_when_set'],
+    readonly last_price: number
+}
+
 export enum Base {
     USDT= "USDT",
     BTC ="BTC"
+}
+
+export enum Change {
+    UP="UP",
+    DOWN="DOWN"
 }

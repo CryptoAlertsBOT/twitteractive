@@ -2,12 +2,14 @@ import {Request, Response, Router} from "express";
 import "dotenv/config";
 import {env} from 'process';
 import colors from "colors";
-import { IThresholdData, IPricePayload } from "../../types";
+import { IThresholdData, IPricePayload, ICustomAlertData } from "../../types";
 import { Symbol } from "../../models/Symbol";
-import { SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
+import { AlertDocument, SubscriptionDocument, SymbolDocument, UserDocument } from "../../types/twitter";
 import { Subscription } from "../../models/Subscription";
 import { notification } from "../../events/Notification/handler";
 import { PriceNotification } from "../../events/Notification/types";
+import { CustomAlert } from "../../models/CustomAlert";
+import mongoose from "mongoose";
 
 // Instantiate Express Router
 export const router: Router = Router();
@@ -31,13 +33,62 @@ export const router: Router = Router();
  * If so, check if user needs to be alerted.
  */
 
-router.post('/alertPayload', (req: Request, res: Response) => {
+router.post('/alertPayload', async (req: Request, res: Response) => {
     const payload: IPricePayload = req.body;
 
     // Check if symbol is present in DB. If not, add.
     // 
     // Query payload with database.
-});
+    let symbolInContext: SymbolDocument | null = await Symbol.findOne({symbol: payload.symbol}).exec();
+    if(!symbolInContext) return;
+
+    // Query object to filter CustomAlert DB.
+    const alertMatchQuery: {[key: string]: any} = {$or: [
+        {$and: [
+            {$gt: ["$trigger_price", "$price_when_set"]},
+            {$lte: ["$trigger_price", payload.price]}
+        ]},
+        {$and: [
+            {$gt: ["$price_when_set", "$trigger_price"]},
+            {$lte: [payload.price, "$trigger_price"]}
+        ]}
+    ]};
+
+    // Get matched alerts
+    let alertsMatched: AlertDocument[] | null = await CustomAlert.find({symbol: symbolInContext._id, $expr: alertMatchQuery})
+        .populate('symbol')
+        .populate('user')
+        .exec();
+
+    // If no alerts matched, then return.
+    if (!alertsMatched) return;
+
+    // else
+    alertsMatched.forEach((alert: AlertDocument) => {
+        const alert_id: mongoose.Types.ObjectId = alert.get('_id');
+        const twitterID: string = alert.get("user.twitterID");
+        const username: string = alert.get("user.username");
+        const trigger_price: number = alert.get("trigger_price");
+        const price_when_set: number = alert.get("price_when_set");
+
+        const data: ICustomAlertData = {
+            alert_id,
+            twitterID,
+            username,
+            symbol: payload.symbol,
+            trigger_price,
+            price_when_set,
+            last_price: payload.price
+        }
+
+
+        // fire off notification event here.
+        notification.emit(PriceNotification.CUSTOM_ALERT, data);
+    });
+
+    });
+
+
 
 
 /**

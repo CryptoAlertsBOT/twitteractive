@@ -206,3 +206,14 @@ export const sendMessageToUser = (userID: string, text:string) => {
 const addZero = (value: number): string => {
     return `0${value}`;
 };
+
+
+/**
+ * @description Function to calculate change
+ * @param start {Number}
+ * @param end (Number)
+ * @returns Number
+ */
+export const calcChange = (start: number, end: number): number => {
+    return (end-start)/100;
+}

@@ -1,6 +1,7 @@
 import NotificationEmitter from ".";
-import { endsWithBase, formatTriggerTime, getBaseAbbrevation, getFormattedDateTime, getQuoteAsset, sendMessageToUser } from "../../controllers";
-import { Base, IThresholdData } from "../../types";
+import { RemoveAlertRequest } from "../../classes/RemoveAlertRequest";
+import { calcChange, endsWithBase, formatTriggerTime, getBaseAbbrevation, getFormattedDateTime, getQuoteAsset, sendMessageToUser } from "../../controllers";
+import { Base, Change, ICustomAlertData, IThresholdData } from "../../types";
 import { PriceNotification } from "./types";
 
 
@@ -29,4 +30,22 @@ notification.on(PriceNotification.SUBSCIPTION_ALERT, (data: IThresholdData) => {
 
     sendMessageToUser(data.userID, message);
     
+});
+
+/**
+ * @event CUSTOM_ALERT [ICustomAlertData]
+ * @description Send an alert to subscribed users for custom price alert.
+ */
+
+notification.on(PriceNotification.CUSTOM_ALERT, async (data: ICustomAlertData): Promise<void> => {
+    let message = ``;
+    const {twitterID, username, trigger_price, price_when_set, last_price, symbol, alert_id} = data;
+
+    // set direction
+    let hasToGo: Change = trigger_price > price_when_set ? Change.UP : Change.DOWN;
+    message = `${symbol} has reached your price target (${trigger_price}).\nCurrent price - ${last_price}\nChange - ${calcChange(price_when_set, last_price)}`;
+    sendMessageToUser(twitterID, message);
+
+    // Purge alert
+    await RemoveAlertRequest.purgeAlert(alert_id);
 });
