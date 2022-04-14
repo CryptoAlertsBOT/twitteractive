@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { getBinanceData, sendMessageToUser } from "../../controllers";
 import { Symbol } from "../../models/Symbol";
+import { PurgedAlert } from "../../models/PurgedAlert";
 import { User } from "../../models/User";
 import { CustomAlert } from "../../models/CustomAlert";
-import { CommandType, InvalidRequestType, SymbolDocument, UserDocument, AlertDocument } from "../../types/twitter";
+import { CommandType, InvalidRequestType, SymbolDocument, PurgedAlertDocument, UserDocument, AlertDocument } from "../../types/twitter";
 import { IncomingRequest } from "../IncomingRequest";
 
 /**
@@ -119,6 +120,19 @@ export class RemoveAlertRequest extends IncomingRequest {
                     // update the user model to remove this alert in the alerts list.
                     // update alerts list in User model
                     await User.findOneAndUpdate({_id: user._id}, {$pull: {alerts: alert._id}}, {upsert: true}).exec();
+
+                    // push Alert data to PurgedAlert model.
+                    let purgedAlertData: PurgedAlertDocument = new PurgedAlert({
+                        symbol: this.symbol,
+                        userID: this.userID,
+                        username: this.username,
+                        trigger_price: alert.get("trigger_price"),
+                        price_when_set: alert.get("price_when_set"),
+                        deletedOn: new Date()
+                    });
+
+                    // save purged alert to DB
+                    await purgedAlertData.save();
 
                     // delete the alert from db
                     CustomAlert.findByIdAndDelete(alert._id, null, (err: mongoose.CallbackError, doc) => {

@@ -133,6 +133,8 @@ export class IncomingRequest {
             commands.push(CommandType.REMOVEALERT)
         }
 
+        console.log(commands, text, setalertKeywordRegex.test(text))
+
         return commands;
     }
 

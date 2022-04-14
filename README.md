@@ -16,7 +16,12 @@
 	SYMBOL
 		- ID
 		- SYMBOL
-		- USERS (ID)
+		- SUBS (ID)
+		
+	SUBSCRIPTION
+		- ID
+		- SYMBOL (ID)
+		- USER (ID)
 
 	CUSTOM_ALERT
 		- ID
@@ -24,6 +29,22 @@
 		- USER_ID
 		- TRIGGER_PRICE
 		- PRICE_WHEN_SET
+		
+	PURGED_SUB
+		- ID
+		- SYMBOL
+		- USER
+		- CREATED_AT
+		- DELETED_ON
+		
+	PURGED_ALERT
+		- ID
+		- SYMBOL
+		- USER
+		- PRICE_WHEN_SET
+		- TRIGGER_PRICE
+		- CREATED_AT
+		- DELETED_ON
 
 ## Algorithm
 
