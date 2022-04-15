@@ -48,8 +48,6 @@ app.listen(port, async () => {
 
         const commandType : CommandType[] = IncomingRequest.validateRequest(tweetText);
 
-        console.log('Command: ', commandType);
-
         // catch invalid commands
         if( commandType.length != 1 ) {
             
