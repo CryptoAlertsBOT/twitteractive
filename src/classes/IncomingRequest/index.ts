@@ -112,11 +112,11 @@ export class IncomingRequest {
         const removeKeywordRegex = new RegExp("\\b" + removeKeyword + "(?! alert)\\b", "i");
         const isRemoveRequest = removeKeywordRegex.test(text)
 
-        const setalertKeyword = 'set alert'
+        const setalertKeyword = 'set {1,}alert'
         const setalertKeywordRegex = new RegExp("\\b" + setalertKeyword + "\\b", "i");
         const isSetAlertRequest = setalertKeywordRegex.test(text)
 
-        const removealertKeyword = 'remove alert'
+        const removealertKeyword = 'remove {1,}alert'
         const removealertKeywordRegex = new RegExp("\\b" + removealertKeyword + "\\b", "i");
         const isRemoveAlertRequest = removealertKeywordRegex.test(text)
 
