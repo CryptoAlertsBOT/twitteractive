@@ -4,6 +4,7 @@ import { IUserSchema } from "../models/User/types"
 import { ICustomAlertSchema } from "../models/CustomAlert/types"
 import { ISubscriptionSchema } from "../models/Subscription/types";
 import { IPurgedSubSchema } from "../models/PurgedSub/types";
+import { IPurgedAlertSchema } from "../models/PurgedAlert/types";
 
 export enum CommandType {
     UNSET= "none",
@@ -35,3 +36,4 @@ export type SymbolDocument = mongoose.Document<ISymbolSchema>;
 export type AlertDocument = mongoose.Document<ICustomAlertSchema>;
 export type SubscriptionDocument = mongoose.Document<ISubscriptionSchema>;
 export type PurgedSubscriptionDocument = mongoose.Document<IPurgedSubSchema>;
+export type PurgedAlertDocument = mongoose.Document<IPurgedAlertSchema>;

@@ -6,7 +6,7 @@ export interface IUserSchema extends mongoose.Document {
     twitterID: string,
     username: string,
     screen_name: string,
-    subscriptions?: ISymbolSchema['_id'][],
+    subs?: ISymbolSchema['_id'][],
     alerts?: mongoose.Types.ObjectId[]
 }
 

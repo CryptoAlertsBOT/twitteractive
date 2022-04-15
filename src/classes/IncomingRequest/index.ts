@@ -105,19 +105,19 @@ export class IncomingRequest {
         let commands: CommandType[] = [];
 
         const addKeyword = 'add'
-        const addKeywordRegex = new RegExp("(^| +)" + addKeyword + "( +|[.])", "i");
+        const addKeywordRegex = new RegExp('\\b' + addKeyword + '\\b', 'i');
         const isAddRequest = addKeywordRegex.test(text)
 
         const removeKeyword = 'remove'
-        const removeKeywordRegex = new RegExp("(^| +)" + removeKeyword + "( +|[.])", "i");
+        const removeKeywordRegex = new RegExp("\\b" + removeKeyword + "(?! alert)\\b", "i");
         const isRemoveRequest = removeKeywordRegex.test(text)
 
-        const setalertKeyword = 'setalert'
-        const setalertKeywordRegex = new RegExp("(^| +)" + setalertKeyword + "( +|[.])", "i");
+        const setalertKeyword = 'set {1,}alert'
+        const setalertKeywordRegex = new RegExp("\\b" + setalertKeyword + "\\b", "i");
         const isSetAlertRequest = setalertKeywordRegex.test(text)
 
-        const removealertKeyword = 'removealert'
-        const removealertKeywordRegex = new RegExp("(^| +)" + removealertKeyword + "( +|[.])", "i");
+        const removealertKeyword = 'remove {1,}alert'
+        const removealertKeywordRegex = new RegExp("\\b" + removealertKeyword + "\\b", "i");
         const isRemoveAlertRequest = removealertKeywordRegex.test(text)
 
         if(isAddRequest) {

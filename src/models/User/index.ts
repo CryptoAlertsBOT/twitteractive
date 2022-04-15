@@ -18,7 +18,7 @@ const userSchema: Schema<IUserSchema> = new Schema({
         unique: false,
     },
 
-    subscriptions: [{
+    subs: [{
         type: Types.ObjectId,
         ref: "Subscription"
     }],
