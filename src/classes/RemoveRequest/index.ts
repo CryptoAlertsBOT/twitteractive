@@ -26,8 +26,10 @@ export class RemoveRequest extends IncomingRequest {
 
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
+        
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0].toUpperCase();
+        this.symbol = this.hashtags[0];
+        if (this.symbol) this.symbol = this.symbol.toUpperCase();
 
         // log to console
         this.log(CommandType.REMOVE);
