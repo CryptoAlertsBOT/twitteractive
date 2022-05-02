@@ -30,7 +30,7 @@ export class RemoveAlertRequest extends IncomingRequest {
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
 
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0].toUpperCase();
+        this.symbol = this.hashtags[0];
         if (this.symbol) this.symbol = this.symbol.toUpperCase();
 
         this.trigger_price = RemoveAlertRequest.extractPrice(text);
