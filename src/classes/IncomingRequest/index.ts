@@ -112,11 +112,11 @@ export class IncomingRequest {
         const removeKeywordRegex = new RegExp("\\b" + removeKeyword + "(?! alert)\\b", "i");
         const isRemoveRequest = removeKeywordRegex.test(text)
 
-        const setalertKeyword = 'set {1,}alert'
+        const setalertKeyword = 'set {0,}alert'
         const setalertKeywordRegex = new RegExp("\\b" + setalertKeyword + "\\b", "i");
         const isSetAlertRequest = setalertKeywordRegex.test(text)
 
-        const removealertKeyword = 'remove {1,}alert'
+        const removealertKeyword = 'remove {0,}alert'
         const removealertKeywordRegex = new RegExp("\\b" + removealertKeyword + "\\b", "i");
         const isRemoveAlertRequest = removealertKeywordRegex.test(text)
 
@@ -194,10 +194,15 @@ export class IncomingRequest {
     }
 
     protected likeTweet () {
-        T.post('favorites/create',  {id: this.tweetID}, (err, data, response) => {
-            if (err) {
-                console.log(err)
-            }
-        });
+        try {
+            T.post('favorites/create',  {id: this.tweetID}, (err, data, response) => {
+                if (err) {
+                    console.log(err)
+                }
+            });
+        } catch(err: any) {
+            console.error(err)
+        }
+        
     }
 }

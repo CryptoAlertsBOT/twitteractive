@@ -49,28 +49,25 @@ export const getBinanceData = async (symbol: string): Promise<Response | null>  
  * @param text Message to send
  */
 export const sendMessageToUser = (userID: string, text:string) => {
-    try {
-        T.post('direct_messages/events/new', 
-            {//@ts-ignore
-                event: {
-                    type: 'message_create',
-                    message_create: {
-                        target: {
-                            recipient_id: userID
-                        },
-                        message_data: { text }
-                    }
-                }
-            }, 
-            (err, data, response) => {
-                if (err) {
-                    console.log('ERROR SENDING MESSAGE', err);
+    
+    T.post('direct_messages/events/new', 
+        {//@ts-ignore
+            event: {
+                type: 'message_create',
+                message_create: {
+                    target: {
+                        recipient_id: userID
+                    },
+                    message_data: { text }
                 }
             }
-        )
-    } catch (err: any) {
-        console.error(err)
-    }
+        }, 
+        (err, data, response) => {
+            if (err) {
+                console.log(`ERROR SENDING MESSAGE\n\nError Message: (${err.name}) -${err.message}`);
+            }
+        }
+    )
 };
 
 

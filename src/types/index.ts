@@ -48,7 +48,8 @@ export enum Base {
     BTC ="BTC"
 }
 
-export enum Change {
+export enum Direction {
     UP="UP",
-    DOWN="DOWN"
+    DOWN="DOWN",
+    UNSET="UNSET"
 }

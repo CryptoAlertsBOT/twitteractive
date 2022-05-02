@@ -7,6 +7,7 @@ export interface IPurgedAlertSchema extends mongoose.Document {
     trigger_price: number,
     price_when_set: number
     deletedOn?: Date
+    createdOn: Date
 }
 
 export interface IPurgedAlertModel extends mongoose.Model<IPurgedAlertSchema> {}

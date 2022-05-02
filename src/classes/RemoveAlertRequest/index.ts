@@ -146,6 +146,7 @@ export class RemoveAlertRequest extends IncomingRequest {
                         username: this.username,
                         trigger_price: alert.get("trigger_price"),
                         price_when_set: alert.get("price_when_set"),
+                        createdOn: alert.get("createdAt"),
                         deletedOn: new Date()
                     });
 

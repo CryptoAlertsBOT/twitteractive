@@ -25,12 +25,16 @@ const PurgedAlertSchema: Schema<IPurgedAlertSchema> = new Schema({
         required: true,
         min: [0, "Current price cannot be negative or 0"]
     },
+    createdOn: {
+        type: Date,
+        requried: true,
+    },
     deletedOn: {
         type: Date,
         requried: true,
     }
     
-}, {timestamps: {createdAt: true, updatedAt: false, currentTime: () => new Date()}});
+}, {timestamps: {createdAt: false, updatedAt: false, currentTime: () => new Date()}});
 
 
 /**
