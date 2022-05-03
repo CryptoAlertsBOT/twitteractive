@@ -25,10 +25,10 @@ export class AddRequest extends IncomingRequest {
 
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
-        
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0];
-        if (this.symbol) this.symbol = this.symbol.toUpperCase();
+        this.symbol = '';
+        if(this.hashtags[0] == undefined) return;
+        this.symbol = this.hashtags[0].toUpperCase();
 
         // log to console
         this.log(CommandType.ADD);

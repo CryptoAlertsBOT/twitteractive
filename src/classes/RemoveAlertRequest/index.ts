@@ -28,12 +28,12 @@ export class RemoveAlertRequest extends IncomingRequest {
 
         // set class specific properties
         this.hashtags = IncomingRequest.extractSymbols(hashtags);
+        this.trigger_price = RemoveAlertRequest.extractPrice(text);
 
         // set symbol to the first recorded hashtag.
-        this.symbol = this.hashtags[0];
-        if (this.symbol) this.symbol = this.symbol.toUpperCase();
-
-        this.trigger_price = RemoveAlertRequest.extractPrice(text);
+        this.symbol = '';
+        if(this.hashtags[0] == undefined) return;
+        this.symbol = this.hashtags[0].toUpperCase();
 
         // log to console
         this.log(CommandType.REMOVEALERT);
@@ -89,6 +89,9 @@ export class RemoveAlertRequest extends IncomingRequest {
      */
 
     public async removeAlert(): Promise<boolean> {
+        //upper case symbol
+        
+
         // check if trigger price is valid
         if(!this.trigger_price) {
             IncomingRequest.notifyInvalidRequest(this.userID, InvalidRequestType.INVALID_TRIGGER_PRICE);
