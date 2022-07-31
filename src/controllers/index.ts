@@ -9,7 +9,7 @@ import { Base } from "../types";
 export const connectDB = async (): Promise<boolean> => {
     let connection: boolean = false;
 
-    mongoose.connect("mongodb+srv://root:ProjectPassword11!!@cluster1.bgw5q.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+    mongoose.connect("mongodb+srv://FAKEUSER:FAKEPASS:)@cluster1.bgw5q.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
         .then(() => {
             console.log('MongoDB Connected'.green);
             connection = true;
